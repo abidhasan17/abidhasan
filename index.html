@@ -1,7 +1,226 @@
----
-title: "Portfolio item number 2"
-excerpt: "Short description of portfolio item number 2 <br/><img src='/images/500x300.png'>"
-collection: portfolio
----
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Mohammad Abid Hasan</title>
+    <meta name="author" content="Mohammad Abid Hasan">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  </head>
 
-This is an item in your portfolio. It can be have images or nice text. If you name the file .md, it will be parsed as markdown. If you name the file .html, it will be parsed as HTML. 
+  <body>
+    <!-- Outer container to center the content -->
+    <table style="width:100%;max-width:900px;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+      <tbody>
+        <tr>
+          <td>
+
+            <!-- HEADER: Name, bio, links, photo -->
+            <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+              <tbody>
+                <tr>
+                  <!-- Left: text -->
+                  <td style="padding:2.5%;width:63%;vertical-align:middle;">
+                    <p class="name" style="text-align:center;">
+                      Mohammad Abid Hasan
+                    </p>
+                    <p>
+                      I am a graduate student in Atmospheric Science at Texas Tech University, focusing on wind engineering and severe convective storms. My background is in Civil Engineering, and I previously worked on advanced infrastructure materials and structural health monitoring.
+                    </p>
+                    <p>
+                      My current research focuses on the flow physics and pressure loading of tornado like vortices around low rise buildings. I use Large Eddy Simulation (LES) in OpenFOAM, high performance computing, and data driven analysis to study vortex generation with moving louvers and to develop surrogate models for predicting wind loads.
+                    </p>
+                    <p>
+                      I am interested in problems at the intersection of wind engineering, computational fluid dynamics, and machine learning, with an eye toward resilient and efficient design of the built environment.
+                    </p>
+                    <p style="text-align:center;">
+                      <a href="mailto:YOUR_EMAIL_HERE">Email</a> &nbsp;/&nbsp;
+                      <a href="YOUR_GOOGLE_SCHOLAR_LINK_HERE">Google Scholar</a> &nbsp;/&nbsp;
+                      <a href="https://github.com/YOUR_GITHUB_USERNAME">GitHub</a> &nbsp;/&nbsp;
+                      <a href="YOUR_LINKEDIN_LINK_HERE">LinkedIn</a>
+                    </p>
+                  </td>
+
+                  <!-- Right: photo -->
+                  <td style="padding:2.5%;width:37%;max-width:37%;">
+                    <a href="images/media/my_photo.jpeg">
+                      <img
+                        style="width:100%;max-width:100%;object-fit:cover;border-radius:50%;"
+                        alt="profile photo"
+                        src="images/media/my_photo.jpeg">
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- NEWS SECTION -->
+            <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+              <tbody>
+                <tr>
+                  <td style="padding:20px;width:100%;vertical-align:middle;">
+                    <h2>News</h2>
+                    <ul>
+                      <!-- Edit these items for yourself -->
+                      <li style="margin:5px;">
+                        <strong>2025-05</strong> Planning to present my work on tornado like vortices and low rise building loads at the EMI 2025 conference in Anaheim, California.
+                      </li>
+                      <li style="margin:5px;">
+                        <strong>2025-01</strong> Started my research on moving louver vortex generation and LES simulations in OpenFOAM.
+                      </li>
+                      <li style="margin:5px;">
+                        <strong>2024-08</strong> Joined the Atmospheric Science program at Texas Tech University.
+                      </li>
+                      <li style="margin:5px;">
+                        <strong>Earlier</strong> Completed my Civil Engineering studies and worked on self sensing concrete and infrastructure materials.
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- RESEARCH SECTION -->
+            <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+              <tbody>
+                <tr>
+                  <td style="padding:16px;width:100%;vertical-align:middle;">
+                    <h2>Research</h2>
+                    <p></p>
+
+                    <!-- Project 1: Moving louver TLV LES -->
+                    <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+                      <tbody>
+                        <tr>
+                          <!-- Thumbnail -->
+                          <td style="padding:20px;width:25%;vertical-align:middle;">
+                            <div class="one">
+                              <div class="two">
+                                <img src="images/Research/tlv_louver_example.png" width="160" alt="TLV louver LES">
+                              </div>
+                            </div>
+                          </td>
+
+                          <!-- Text -->
+                          <td style="padding:20px;width:75%;vertical-align:middle;">
+                            <span class="papertitle">
+                              Large Eddy Simulation of Tornado Like Vortices Generated by Moving Louvers
+                            </span>
+                            <br>
+                            <strong>Mohammad Abid Hasan</strong>, <span>Your collaborators (if any)</span>
+                            <br>
+                            <em>Ongoing work</em>
+                            <br>
+                            <!-- If you have a PDF or slides, put links here -->
+                            <!-- <a href="files/your_paper_or_poster.pdf">Poster</a> -->
+                            <p>
+                              I am developing a CFD framework in OpenFOAM to generate tornado like vortices using moving louvers in a boundary layer wind tunnel domain. The simulations use LES with dynamic mesh and Arbitrary Mesh Interface (AMI) to capture the vortex structure and its translation, and I analyze pressure and velocity fields around a low rise building model to study extreme pressure coefficients.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <!-- Project 2: Surrogate model / ML -->
+                    <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+                      <tbody>
+                        <tr>
+                          <!-- Thumbnail -->
+                          <td style="padding:20px;width:25%;vertical-align:middle;">
+                            <div class="one">
+                              <div class="two">
+                                <img src="images/Research/ml_surrogate_example.png" width="160" alt="ML surrogate">
+                              </div>
+                            </div>
+                          </td>
+
+                          <!-- Text -->
+                          <td style="padding:20px;width:75%;vertical-align:middle;">
+                            <span class="papertitle">
+                              Data Driven Surrogate Models for Vortex Induced Pressure Loading
+                            </span>
+                            <br>
+                            <strong>Mohammad Abid Hasan</strong>
+                            <br>
+                            <em>Planned work</em>
+                            <br>
+                            <p>
+                              I plan to build neural network based surrogate models that learn the relationship between CFD input parameters (inlet profile, louver motion, mesh resolution) and key flow features such as vortex location, translation speed, and minimum pressure coefficient on building surfaces. The goal is to replace expensive LES runs with fast predictors that still resolve critical wind loads.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <!-- Project 3: Earlier infrastructure materials work -->
+                    <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+                      <tbody>
+                        <tr>
+                          <!-- Thumbnail -->
+                          <td style="padding:20px;width:25%;vertical-align:middle;">
+                            <div class="one">
+                              <div class="two">
+                                <img src="images/Research/self_sensing_concrete_example.png" width="160" alt="Self sensing concrete">
+                              </div>
+                            </div>
+                          </td>
+
+                          <!-- Text -->
+                          <td style="padding:20px;width:75%;vertical-align:middle;">
+                            <span class="papertitle">
+                              Self Sensing Concrete and Smart Infrastructure Materials
+                            </span>
+                            <br>
+                            <strong>Mohammad Abid Hasan</strong>
+                            <br>
+                            <em>Previous research</em>
+                            <br>
+                            <p>
+                              Before moving fully into wind engineering, I worked on self sensing cementitious materials and smart infrastructure systems. This included studying the electrical and mechanical behavior of cement based composites for structural health monitoring and damage detection in concrete members.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- TEACHING SECTION -->
+            <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+              <tbody>
+                <tr>
+                  <td style="padding:20px;width:100%;vertical-align:middle;">
+                    <h2>Teaching</h2>
+
+                    <table style="width:100%;border:0;border-spacing:0;border-collapse:separate;margin:0 auto;">
+                      <tbody>
+                        <tr>
+                          <td style="padding:0;width:25%;vertical-align:middle;">
+                            <!-- Replace this with your university logo if you want -->
+                            <img src="images/media/university_logo.png" width="180" alt="University logo">
+                          </td>
+                          <td style="padding:20px;width:75%;vertical-align:middle;">
+                            <!-- If you have real TA experience, list it here. Otherwise keep it generic or edit later. -->
+                            <p>
+                              Teaching experience to be updated.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
