@@ -1,0 +1,633 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Wind engineering, atmospheric science, tornado-like vortices, CFD, LES, OpenFOAM research by Mohammad Abid Hasan.">
+  <meta name="keywords" content="wind engineering, CFD, tornado vortex, OpenFOAM, LES, atmospheric science, Texas Tech, boundary layer wind tunnel">
+  <title>Mohammad Abid Hasan</title>
+  <meta name="author" content="Mohammad Abid Hasan">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+  <style>
+    /* ----------------------------------------------------------
+       THEME VARIABLES — tweak these to change the bluish palette
+       ---------------------------------------------------------- */
+    :root {
+      --bg-top:        #cfe0ef;   /* sky-ish blue at the top    */
+      --bg-bottom:     #8eb3d4;   /* deeper blue at the bottom  */
+      --panel-bg:      rgba(255, 255, 255, 0.78);
+      --panel-border:  rgba(80, 110, 140, 0.18);
+      --tab-bg:        rgba(255, 255, 255, 0.55);
+      --tab-bg-hover:  rgba(255, 255, 255, 0.85);
+      --tab-active-bg: #1f3a57;
+      --tab-active-fg: #ffffff;
+      --text-dark:     #1b2a3a;
+      --accent:        #1772d0;
+    }
+
+    /* Page background — gradient + the tornado canvas sits behind everything */
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%) fixed !important;
+      color: var(--text-dark);
+    }
+
+    #tornado-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      /* keep it subtle so text stays readable */
+      opacity: 0.55;
+    }
+
+    /* All content sits above the canvas */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 64px 16px;
+    }
+
+    /* Panels — frosted glass over the gradient */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin: 18px 0;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 4px 18px rgba(20, 40, 70, 0.08);
+    }
+
+    /* Tab navigation */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      position: sticky;
+      top: 12px;
+      z-index: 5;
+      box-shadow: 0 4px 18px rgba(20, 40, 70, 0.08);
+    }
+
+    .tab-btn {
+      flex: 1 1 auto;
+      min-width: 110px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--tab-bg);
+      color: var(--text-dark);
+      font-family: 'Lato', Verdana, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+    .tab-btn:hover { background: var(--tab-bg-hover); }
+    .tab-btn:active { transform: translateY(1px); }
+    .tab-btn.active {
+      background: var(--tab-active-bg);
+      color: var(--tab-active-fg);
+    }
+
+    /* Tab panel visibility */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Header layout inside the About panel */
+    .header-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 640px) {
+      .header-grid { grid-template-columns: 1fr; }
+      .header-grid .header-photo { order: -1; text-align: center; }
+    }
+    .header-photo img {
+      width: 100%;
+      max-width: 260px;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      margin: 0 auto;
+      box-shadow: 0 6px 20px rgba(20, 40, 70, 0.18);
+    }
+
+    /* Links row under bio */
+    .links-row {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .links-row a {
+      margin: 0 4px;
+      font-weight: 700;
+    }
+
+    /* Research / project rows */
+    .project-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 22px;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-top: 1px dashed rgba(80, 110, 140, 0.25);
+    }
+    .project-row:first-child { border-top: none; }
+    .project-row .thumb img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(20, 40, 70, 0.12);
+    }
+    @media (max-width: 640px) {
+      .project-row { grid-template-columns: 1fr; }
+    }
+
+    /* News list */
+    .news-list { padding-left: 18px; }
+    .news-list li { margin: 8px 0; }
+    .news-date {
+      display: inline-block;
+      min-width: 90px;
+      font-weight: 700;
+      color: var(--tab-active-bg);
+    }
+
+    /* Publication entries */
+    .pub-entry {
+      padding: 12px 0;
+      border-top: 1px dashed rgba(80, 110, 140, 0.25);
+    }
+    .pub-entry:first-child { border-top: none; }
+    .pub-meta { font-style: italic; color: #2f4a66; }
+    .pub-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #1f3a57;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .pub-tag.alt { background: #4f6f8e; }
+    .pub-tag.warn { background: #b87333; }
+
+    h2 {
+      color: var(--tab-active-bg);
+      margin: 0 0 12px 0;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    h3 {
+      color: var(--tab-active-bg);
+      margin: 18px 0 8px 0;
+      font-size: 18px;
+    }
+
+    .papertitle { color: var(--tab-active-bg); }
+  </style>
+</head>
+
+<body>
+
+  <!-- Tornado canvas (behind everything) -->
+  <canvas id="tornado-bg"></canvas>
+
+  <div class="page-wrap">
+
+    <!-- ============================================================
+         TAB NAVIGATION
+         ============================================================ -->
+    <nav class="tabs" role="tablist" aria-label="Site sections">
+      <button class="tab-btn active" data-tab="about"        role="tab">About</button>
+      <button class="tab-btn"        data-tab="research"     role="tab">Research</button>
+      <button class="tab-btn"        data-tab="publications" role="tab">Publications</button>
+      <button class="tab-btn"        data-tab="fieldwork"    role="tab">Field Work</button>
+      <button class="tab-btn"        data-tab="teaching"     role="tab">Teaching</button>
+      <button class="tab-btn"        data-tab="news"         role="tab">News</button>
+    </nav>
+
+    <!-- ============================================================
+         ABOUT
+         ============================================================ -->
+    <section id="about" class="tab-panel active panel" role="tabpanel">
+      <div class="header-grid">
+        <div>
+          <p class="name" style="margin-top:0;">Mohammad Abid Hasan</p>
+
+          <p>
+            I am a graduate student in Atmospheric Science at Texas Tech University, focusing on wind engineering and severe convective storms. My background is in Civil Engineering, and I previously worked on advanced infrastructure materials and structural health monitoring.
+          </p>
+
+          <p>
+            My current research focuses on the flow physics and pressure loading of tornado like vortices around low rise buildings. I use Large Eddy Simulation (LES) in OpenFOAM, high performance computing, and data driven analysis to study vortex generation with moving louvers and to develop surrogate models for predicting wind loads.
+          </p>
+
+          <p>
+            I am interested in problems at the intersection of wind engineering, computational fluid dynamics, and machine learning, with an eye toward resilient and efficient design of the built environment.
+          </p>
+
+          <p class="links-row">
+            <a href="mailto:has24395@ttu.edu">Email</a> &nbsp;/&nbsp;
+            <a href="https://scholar.google.com/citations?user=2jdL18kAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a> &nbsp;/&nbsp;
+            <a href="https://github.com/abidhasan17" target="_blank" rel="noopener">GitHub</a> &nbsp;/&nbsp;
+            <a href="CV_Abid_5_15.pdf" target="_blank" rel="noopener">CV</a> &nbsp;/&nbsp;
+            <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+          </p>
+        </div>
+
+        <div class="header-photo">
+          <img src="Abid_Buet.jpg" alt="Mohammad Abid Hasan">
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px dashed rgba(80,110,140,0.25);margin:24px 0;">
+
+      <h3>Education</h3>
+      <ul>
+        <li><strong>Texas Tech University</strong>, M.S. in Atmospheric Science (Jan 2025 &ndash; Present). CGPA 4.00/4.00.</li>
+        <li><strong>Texas State University</strong>, M.S. in Civil Engineering (Sep 2024 &ndash; Dec 2024). CGPA 4.00/4.00.</li>
+        <li><strong>Bangladesh University of Engineering and Technology (BUET)</strong>, B.Sc. in Civil Engineering (Mar 2018 &ndash; May 2023). CGPA 3.52/4.00.</li>
+      </ul>
+
+      <h3>Research Interests</h3>
+      <ul>
+        <li>Wind engineering and computational wind engineering (CWE)</li>
+        <li>Building relevant winds (damaging straight line winds, thunderstorms, tornadoes); data assimilation</li>
+        <li>Disaster resilient built environment</li>
+        <li>AI accelerated computational fluid dynamics (CFD)</li>
+        <li>Urban canopy layer dynamics, urban heat island</li>
+        <li>Structural health monitoring, non destructive evaluation, smart infrastructure systems</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         RESEARCH
+         ============================================================ -->
+    <section id="research" class="tab-panel panel" role="tabpanel">
+      <h2>Research</h2>
+
+      <div class="project-row">
+        <div class="thumb"><img src="TLV.png" alt="Tornado-like vortex simulation"></div>
+        <div>
+          <span class="papertitle">Large Eddy Simulation of Tornado Like Vortices Generated by Moving Louvers</span><br>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>Ongoing work</em>
+          <p>
+            I am developing a CFD framework in OpenFOAM to generate tornado like vortices using moving louvers in a boundary layer wind tunnel domain. The simulations use LES with dynamic mesh and Arbitrary Mesh Interface (AMI) to capture the vortex structure and its translation, and I analyze pressure and velocity fields around a low rise building model to study extreme pressure coefficients.
+          </p>
+        </div>
+      </div>
+
+      <div class="project-row">
+        <div class="thumb"><img src="TLV_Building.png" alt="TLV interacting with low-rise building"></div>
+        <div>
+          <span class="papertitle">Data Driven Surrogate Models for Vortex Induced Pressure Loading</span><br>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>Planned work</em>
+          <p>
+            I plan to build neural network based surrogate models that learn the relationship between CFD input parameters (inlet profile, louver motion, mesh resolution) and key flow features such as vortex location, translation speed, and minimum pressure coefficient on building surfaces. The goal is to replace expensive LES runs with fast predictors that still resolve critical wind loads.
+          </p>
+        </div>
+      </div>
+
+      <div class="project-row">
+        <div class="thumb"><img src="Abid_Poster.png" alt="Poster presentation on TLV CFD research"></div>
+        <div>
+          <span class="papertitle">Poster Presentation</span><br>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>May 2, 2025</em>
+          <p>
+            On May 2, 2025, our research group presented a poster summarizing the overall research thrust and recent progress in CFD simulations, with a focus on tornado-like vortex generation and wind tunnel inspired numerical modeling.
+          </p>
+          <p>
+            <strong>Event:</strong> Celebrating Success and Excellence, Department of Geoscience, Texas Tech University.
+          </p>
+          <p><a href="Poster_May_2nd.pdf" target="_blank" rel="noopener">Poster (PDF)</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PUBLICATIONS
+         ============================================================ -->
+    <section id="publications" class="tab-panel panel" role="tabpanel">
+      <h2>Publications</h2>
+
+      <h3>Peer-reviewed journal</h3>
+      <div class="pub-entry">
+        <span class="pub-tag">Published</span>
+        <span class="papertitle">Advancing tornado-like vortex (TLV) generation in straight-line wind simulators: An LES study</span><br>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+        <span class="pub-meta">Journal of Wind Engineering and Industrial Aerodynamics, Volume 271, 2026, 106373, ISSN 0167-6105.</span><br>
+        <a href="https://doi.org/10.1016/j.jweia.2026.106373" target="_blank" rel="noopener">doi.org/10.1016/j.jweia.2026.106373</a>
+      </div>
+
+      <h3>Peer-reviewed journal (to be submitted)</h3>
+      <div class="pub-entry">
+        <span class="pub-tag warn">In preparation</span>
+        <span class="papertitle">Tornado-like vortex (TLV) induced loading in straight-line wind simulators</span><br>
+        Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>, Franklin T. Lombardo.
+      </div>
+
+      <h3>Conference presentations</h3>
+      <div class="pub-entry">
+        <span class="pub-tag alt">Oral, AMS 2026</span>
+        <span class="papertitle">Generating tornado-like vortices (TLVs) in straight-line simulators using moving louvers with LES</span><br>
+        Oral presentation at the 2026 AMS Annual Meeting, Houston, TX.
+      </div>
+
+      <h3>Peer-reviewed conference abstracts (to be presented)</h3>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span>
+        <span class="papertitle">Advancing Tornado-Like Vortices (TLVs) Modeling in Straight-Line Simulators</span><br>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span>
+        <span class="papertitle">Digital twin of a supercell rear-flank downdraft (RFD) current in a computational domain using LES</span><br>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Samuel Hanson, Jon Schroeder.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span>
+        <span class="papertitle">Investigating interference effects on aerodynamic loading under tornado-like vortices: An LES study</span><br>
+        Samuel Hanson, <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span>
+        <span class="papertitle">AI/ML-Powered processing of near-surface anemometer network observation for enhancing CFD simulations of low-rise buildings under downburst events</span><br>
+        Guangzhao Chen, Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FIELD WORK
+         ============================================================ -->
+    <section id="fieldwork" class="tab-panel panel" role="tabpanel">
+      <h2>Field Deployment</h2>
+
+      <div class="pub-entry">
+        <span class="papertitle">High-resolution ABL data around an instrumented cube &mdash; Lubbock, Texas</span><br>
+        <span class="pub-meta">25 Jun 2025 &ndash; 27 Jun 2025</span>
+        <ul>
+          <li>Deployed TTU StickNets to gather wind data at high spatial resolution.</li>
+          <li>Gathered high-resolution spatial and temporal wind velocity and pressure data around an instrumented cube.</li>
+        </ul>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Vortex-based flow system (dust devil) &mdash; Las Cruces, New Mexico</span><br>
+        <span class="pub-meta">29 Jun 2025 &ndash; 3 Jul 2025</span>
+        <ul>
+          <li>Deployed TTU StickNets and GoPro cameras to visualize and quantify loading on an instrumented cube induced by a dust devil.</li>
+          <li>Collected near-ground, high-resolution spatial and temporal thunderstorm outflow data.</li>
+        </ul>
+      </div>
+
+      <h3>Selected past projects</h3>
+      <div class="pub-entry">
+        <span class="papertitle">TxDOT 0-7206: Optimum 2-Mat Reinforcement Design in CRCP</span>
+        <ul>
+          <li>Conducted finite element simulations to optimize CRCP designs using ANSYS.</li>
+          <li>Coordinated field data collection and analyzed structural performance using Loggernet.</li>
+        </ul>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Real-Time Structural Health Monitoring &mdash; Kyle Fire Station</span><br>
+        <span class="pub-meta">Apr 2023 &ndash; Nov 2024</span>
+        <ul>
+          <li>Implemented a self-sensing concrete system with vibrating wire strain gauges.</li>
+          <li>Analyzed real-time data for infrastructure performance using Loggernet.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TEACHING
+         ============================================================ -->
+    <section id="teaching" class="tab-panel panel" role="tabpanel">
+      <h2>Teaching</h2>
+
+      <div class="project-row">
+        <div class="thumb"><img src="DIU.jpeg" alt="Dhaka International University"></div>
+        <div>
+          <p>I worked as a Lecturer in Civil Engineering at <strong>Dhaka International University</strong>, Dhaka, Bangladesh (Aug 2023 &ndash; Jul 2024). I taught civil engineering courses, supervised student projects, guided thesis research, and developed course materials focused on structural engineering and fluid mechanics.</p>
+          <p>
+            <a href="https://profile.diu.ac/mohammadabidhasan#PersonalInformation" target="_blank" rel="noopener">DIU Academic Profile</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Mentoring</span><br>
+        <span class="pub-meta">Spring 2026</span>
+        <p>Mentored an undergraduate student to develop a machine learning model (XGBoost) to accelerate numerical simulation.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         NEWS
+         ============================================================ -->
+    <section id="news" class="tab-panel panel" role="tabpanel">
+      <h2>News</h2>
+      <ul class="news-list">
+        <li><span class="news-date">2026&#8209;06</span> Planning to present my work on generation of translating tornado-like vortex in a BLWT CFD domain at <em>The 8th International Symposium on Computational Wind Engineering</em>, London, ON, Canada.</li>
+        <li><span class="news-date">2026&#8209;01</span> Planning to present my work on generation of translating tornado-like vortex in a BLWT CFD domain at AMS 2026, Houston.</li>
+        <li><span class="news-date">2025&#8209;07</span> Field deployment in Las Cruces, NM &mdash; instrumented cube + StickNets to capture dust devil loading.</li>
+        <li><span class="news-date">2025&#8209;06</span> Field deployment in Lubbock, TX &mdash; high-resolution ABL data around an instrumented cube.</li>
+        <li><span class="news-date">2025&#8209;05</span> Presented a research poster at the Department of Geoscience Celebrating Success and Excellence event, TTU.</li>
+        <li><span class="news-date">2025&#8209;01</span> Joined the Atmospheric Science program at Texas Tech University.</li>
+        <li><span class="news-date">Earlier</span> Completed my Civil Engineering studies and worked on self sensing concrete and infrastructure materials.</li>
+      </ul>
+    </section>
+
+  </div><!-- /.page-wrap -->
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script>
+  /* ---------------- Tab switching ---------------- */
+  (function () {
+    const buttons = document.querySelectorAll('.tab-btn');
+    const panels  = document.querySelectorAll('.tab-panel');
+
+    function activate(name) {
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      panels.forEach(p  => p.classList.toggle('active', p.id === name));
+      // sync URL hash so links + back button work
+      if (history.replaceState) history.replaceState(null, '', '#' + name);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => activate(btn.dataset.tab));
+    });
+
+    // open the tab matching #hash on load, if any
+    const initial = (location.hash || '').replace('#', '');
+    if (initial && document.getElementById(initial)) {
+      activate(initial);
+    }
+
+    window.addEventListener('hashchange', () => {
+      const h = (location.hash || '').replace('#', '');
+      if (h && document.getElementById(h)) activate(h);
+    });
+  })();
+
+  /* ---------------- Tornado canvas ----------------
+     A funnel-shaped particle vortex. Particles orbit a vertical
+     axis at a radius that grows toward the top of the screen
+     (mesocyclone-wide top, narrow base). They drift downward
+     and respawn at the top. Kept light: ~280 particles.
+     -------------------------------------------------- */
+  (function () {
+    const canvas = document.getElementById('tornado-bg');
+    const ctx    = canvas.getContext('2d');
+    let W, H, DPR;
+
+    function resize() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Funnel geometry: axis is roughly horizontally centered.
+    // Radius shrinks from top to bottom (narrow base).
+    function radiusAt(yNorm) {
+      // yNorm: 0 at top, 1 at bottom of canvas
+      // top is wide, bottom is tight
+      const top    = Math.min(W, H) * 0.55;
+      const bottom = Math.min(W, H) * 0.06;
+      // ease so the funnel curves rather than being a straight cone
+      const t = Math.pow(yNorm, 1.6);
+      return top * (1 - t) + bottom * t;
+    }
+
+    const N = 280;
+    const particles = [];
+    for (let i = 0; i < N; i++) {
+      particles.push({
+        a:  Math.random() * Math.PI * 2,    // angular position
+        // angular velocity: faster near the base, slower up top
+        av: 0.010 + Math.random() * 0.020,
+        y:  Math.random(),                  // normalized 0..1 (top..bottom)
+        // vertical drift speed
+        vy: 0.0006 + Math.random() * 0.0018,
+        // depth gives parallax / size variation
+        z:  0.4 + Math.random() * 0.6,
+        // tiny radial wobble so it doesn't look mechanical
+        wob: Math.random() * Math.PI * 2,
+      });
+    }
+
+    function frame() {
+      // Soft fade rather than full clear -> motion trails
+      ctx.fillStyle = 'rgba(207, 224, 239, 0.18)'; // matches --bg-top
+      ctx.fillRect(0, 0, W, H);
+
+      // center axis: slight horizontal sway over time
+      const t = performance.now() * 0.0002;
+      const axisX = W * 0.5 + Math.sin(t) * W * 0.04;
+
+      for (const p of particles) {
+        // update
+        p.a  += p.av * (0.4 + p.y * 1.2);   // faster swirl near bottom
+        p.y  += p.vy;
+        p.wob += 0.02;
+        if (p.y > 1) {
+          p.y = 0;
+          p.a = Math.random() * Math.PI * 2;
+        }
+
+        const yPix = p.y * H;
+        const baseR = radiusAt(p.y);
+        const r = baseR * (0.85 + 0.15 * Math.sin(p.wob));
+
+        // squash X-axis radius vs Y so the funnel looks tilted toward viewer
+        const x = axisX + Math.cos(p.a) * r * p.z;
+        // particles on the far side appear higher (perspective fake)
+        const persp = Math.sin(p.a) * r * 0.18;
+        const y = yPix + persp;
+
+        // particles on the far side are dimmer
+        const front = (Math.sin(p.a) + 1) * 0.5; // 0..1, 1 = front
+        const alpha = 0.10 + 0.35 * front * p.z;
+        const size  = (0.6 + 1.6 * p.z) * (0.6 + 0.4 * front);
+
+        // bluish-white particle
+        ctx.fillStyle = 'rgba(245, 250, 255, ' + alpha.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // central dark column to suggest the funnel core
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0,   'rgba(40, 60, 85, 0.00)');
+      grad.addColorStop(0.5, 'rgba(40, 60, 85, 0.06)');
+      grad.addColorStop(1,   'rgba(20, 35, 55, 0.18)');
+      ctx.fillStyle = grad;
+      const coreTopR    = radiusAt(0) * 0.35;
+      const coreBaseR   = radiusAt(1) * 0.9;
+      ctx.beginPath();
+      ctx.moveTo(axisX - coreTopR, 0);
+      ctx.lineTo(axisX + coreTopR, 0);
+      ctx.lineTo(axisX + coreBaseR, H);
+      ctx.lineTo(axisX - coreBaseR, H);
+      ctx.closePath();
+      ctx.fill();
+
+      requestAnimationFrame(frame);
+    }
+
+    // Respect reduced-motion preference
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // draw a single static frame instead
+      frame();
+    } else {
+      requestAnimationFrame(frame);
+    }
+  })();
+  </script>
+
+</body>
+</html>
