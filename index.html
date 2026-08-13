@@ -1,0 +1,1252 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Wind engineering, atmospheric science, tornado-like vortices, CFD, LES, OpenFOAM research by Mohammad Abid Hasan.">
+  <meta name="keywords" content="wind engineering, CFD, tornado vortex, OpenFOAM, LES, atmospheric science, Texas Tech, boundary layer wind tunnel">
+  <title>Mohammad Abid Hasan</title>
+  <meta name="author" content="Mohammad Abid Hasan">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+  <!-- Display typeface: Cormorant Garamond, a classic old-style serif.
+       Body text still uses Lato, which comes from your stylesheet.css.
+       To drop the serif: delete these 3 lines and set --font-display
+       to the same value as --font-body in the :root block below. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+
+<!--
+================================================================================
+  HOW TO EDIT THIS FILE
+================================================================================
+
+  Everything lives in this one file. Three parts, in order:
+
+    1. <style>   — all the look and feel.       Starts right below.
+    2. <body>    — all the text content.        Search for "TAB NAVIGATION".
+    3. <script>  — tabs, image fallback, background. Search for "SCRIPTS".
+
+  --------------------------------------------------------------------------
+  COMMON EDITS — where to go
+  --------------------------------------------------------------------------
+
+  Change colors ................. :root block, next section down
+  Make the gold warmer/cooler ... --gold-1 / --gold-2 / --gold-3 in :root
+  Tone the metal down ........... see "TONING IT DOWN" note in :root
+  Change how wide text runs ..... --measure in :root
+  Add / remove a tab ............ 2 places: a button in <nav class="tabs">
+                                  AND a matching <section id="..."> below it.
+                                  The button's data-tab must equal the id.
+  Add a news item ............... NEWS section — copy the template comment there
+  Add a publication ............. PUBLICATIONS section — copy any .pub-entry
+  Add a research project ........ RESEARCH section — copy any .project-row
+  Turn the background off ....... delete the two <canvas> tags in the body
+  Tune the background ........... KNOBS block in script section C
+
+  --------------------------------------------------------------------------
+  IMAGES
+  --------------------------------------------------------------------------
+
+  Research / teaching thumbnails sit in the repo root (TLV.png, DIU.jpeg, ...).
+  News images are expected in  images/news/  — create that folder.
+
+  If a news image isn't there yet, the page shows a dashed box naming the file
+  it's waiting for. Nothing breaks. Handled in script section B.
+
+================================================================================
+-->
+
+  <style>
+    /* ==========================================================================
+       1. THEME TOKENS
+       Change a value here and it updates everywhere on the page.
+       ========================================================================== */
+    :root {
+      /* --- Base blacks ------------------------------------------------------ */
+      --void:      #060709;   /* page base — deepest black                     */
+      --ink-600:   #191d23;   /* raised surfaces, tab hover                    */
+      --ink-500:   #2b323b;   /* solid borders, dashed placeholder outlines    */
+
+      /* --- Text ------------------------------------------------------------- */
+      --paper:     #eef1f5;   /* primary text — the "shaded white"             */
+      --silver:    #99a2ad;   /* secondary text, dates, captions               */
+      --silver-dim:#6e7883;   /* the quietest text on the page                 */
+      --white:     #ffffff;   /* reserved for emphasis only                    */
+
+      /* --- Metal -------------------------------------------------------------
+         Three stops of champagne, dark to light. Used for the name, rules,
+         chips, and link underlines. Muted on purpose — saturated gold reads
+         cheap on black.
+
+         TONING IT DOWN: for platinum instead of champagne, set
+           --gold-1: #6f767f;  --gold-2: #b9c1cb;  --gold-3: #eef2f6;
+         Nothing else needs to change.                                        */
+      --gold-1:    #8a734a;   /* deep, for shadowed parts of the gradient      */
+      --gold-2:    #d8bd85;   /* mid — this is "the" gold                      */
+      --gold-3:    #f6ecd2;   /* near-white highlight                          */
+
+      /* Metallic sweep. Used as background on text and chips. */
+      --metal: linear-gradient(100deg,
+                 var(--gold-1)  0%,
+                 var(--gold-2) 22%,
+                 var(--gold-3) 38%,
+                 var(--gold-2) 52%,
+                 var(--gold-1) 74%,
+                 var(--gold-2) 100%);
+
+      /* --- Glass ------------------------------------------------------------- */
+      --glass-fill: linear-gradient(158deg,
+                      rgba(255, 255, 255, 0.075) 0%,
+                      rgba(255, 255, 255, 0.028) 42%,
+                      rgba(255, 255, 255, 0.014) 100%);
+      --glass-blur: blur(22px) saturate(135%);
+      --line:       rgba(255, 255, 255, 0.10);   /* plain hairline             */
+      --line-soft:  rgba(255, 255, 255, 0.055);  /* internal dividers          */
+
+      /* --- Typefaces --------------------------------------------------------- */
+      --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-body:    'Lato', Verdana, Helvetica, sans-serif;
+
+      /* --- Layout ------------------------------------------------------------ */
+      --measure:   78ch;   /* max line length for paragraphs.
+                              Set to "none" to run text edge to edge.         */
+      --gutter:    32px;   /* space between content and screen edge           */
+      --radius:    14px;   /* corner rounding on panels                       */
+    }
+
+    /* ==========================================================================
+       2. PAGE BASE — black, a light bloom up top, a vignette at the edges
+       ========================================================================== */
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+
+    body {
+      background: var(--void) !important;
+      color: var(--paper);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Bloom: soft light spilling from above, plus a faint warm wash so the
+       black isn't a flat slab. Lower the alphas to make it subtler. */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 68% at 50% -12%,
+          rgba(255, 255, 255, 0.085) 0%,
+          rgba(255, 255, 255, 0.022) 42%,
+          rgba(255, 255, 255, 0) 72%),
+        radial-gradient(90% 55% at 82% 8%,
+          rgba(216, 189, 133, 0.055) 0%,
+          rgba(216, 189, 133, 0) 65%);
+    }
+
+    /* Vignette: darkens the corners so the middle of the screen feels lit. */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(135% 105% at 50% 38%,
+                    rgba(0, 0, 0, 0) 42%,
+                    rgba(0, 0, 0, 0.55) 100%);
+    }
+
+    /* Background canvases. Both fixed to the viewport, behind all content.
+       #flow-bg  = wind streaklines (leaves trails)
+       #glitter-bg = twinkling motes (cleared every frame, so no smearing) */
+    #flow-bg, #glitter-bg {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #flow-bg    { opacity: 0.42; }   /* strength of the wind streaks */
+    #glitter-bg { opacity: 0.85; }   /* strength of the sparkle      */
+
+    /* Content wrapper. Flex column so the active panel stretches down and
+       fills the screen even on tabs with little content. */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 22px var(--gutter) 60px var(--gutter);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       3. TYPOGRAPHY
+       These override the defaults coming from stylesheet.css.
+       ========================================================================== */
+    body, td, th, tr, p, a, li, strong {
+      font-family: var(--font-body);
+      font-size: 16px;
+      color: var(--paper);
+    }
+
+    p  { line-height: 1.66; max-width: var(--measure); color: #dfe4ea; }
+    li { line-height: 1.58; color: #dfe4ea; }
+    ul { max-width: var(--measure); }
+
+    /* --- The name. This is the signature element of the page. ---------------
+       Champagne gradient clipped to the letterforms, with a slow sweep that
+       reads as light moving across metal. Speed = the 11s below.            */
+    .name {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 5.4vw, 68px);
+      font-weight: 500;
+      letter-spacing: 0.005em;
+      line-height: 1.04;
+      margin: 0 0 20px 0;
+      padding-top: 0;
+      background: var(--metal);
+      background-size: 260% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: metal-sweep 11s linear infinite;
+    }
+    @keyframes metal-sweep {
+      from { background-position:    0% 50%; }
+      to   { background-position: -260% 50%; }
+    }
+
+    /* Tab headings ("Research", "Publications", ...) */
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(30px, 2.9vw, 42px);
+      font-weight: 400;
+      letter-spacing: 0.005em;
+      color: var(--white);
+      margin: 0 0 4px 0;
+    }
+
+    /* Sub-headings inside a tab. Small caps in the body face so they read as
+       labels rather than titles. */
+    h3 {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--gold-2);
+      margin: 36px 0 14px 0;
+      padding-bottom: 10px;
+      /* Hairline that fades out to the right — softer than a full rule. */
+      border-image: linear-gradient(90deg,
+        rgba(216, 189, 133, 0.45), rgba(255, 255, 255, 0.06) 45%,
+        rgba(255, 255, 255, 0)) 1;
+      border-bottom: 1px solid transparent;
+    }
+
+    /* Links: white text, champagne underline that lights up on hover. */
+    a {
+      color: var(--paper);
+      text-decoration: underline;
+      text-decoration-color: rgba(216, 189, 133, 0.45);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      transition: color 0.18s ease, text-decoration-color 0.18s ease;
+    }
+    a:hover, a:focus {
+      color: var(--gold-3);
+      text-decoration-color: var(--gold-2);
+    }
+
+    a:focus-visible, button:focus-visible {
+      outline: 1px solid var(--gold-2);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+
+    strong { font-weight: 700; color: var(--white); }
+    em     { color: var(--silver); font-style: italic; }
+
+    /* Divider: hairline that fades in and out at both ends. */
+    .rule {
+      border: none;
+      height: 1px;
+      margin: 30px 0;
+      background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(216, 189, 133, 0.30) 22%,
+        rgba(255, 255, 255, 0.10) 55%,
+        rgba(255, 255, 255, 0) 100%);
+    }
+
+    /* ==========================================================================
+       4. GLASS PANELS AND TABS
+       ========================================================================== */
+
+    /* The glass slab. Three layers stacked:
+         background   — the frosted fill
+         ::before     — a 1px gradient edge (bright top-left, gold bottom-right)
+         ::after      — a specular highlight in the top-left corner            */
+    .panel {
+      position: relative;
+      background: var(--glass-fill);
+      border-radius: var(--radius);
+      padding: 38px 42px 44px 42px;
+      margin: 16px 0 0 0;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 70px rgba(0, 0, 0, 0.62);
+      overflow: hidden;
+    }
+
+    /* Gradient hairline edge. The mask trick draws the gradient only in the
+       1px ring, not across the whole panel. */
+    .panel::before,
+    .tabs::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(150deg,
+        rgba(255, 255, 255, 0.40) 0%,
+        rgba(255, 255, 255, 0.07) 28%,
+        rgba(255, 255, 255, 0.03) 58%,
+        rgba(216, 189, 133, 0.28) 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Specular sheen — the "wet glass" catch-light. */
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: radial-gradient(70% 40% at 8% -6%,
+                    rgba(255, 255, 255, 0.11) 0%,
+                    rgba(255, 255, 255, 0) 62%);
+    }
+
+    /* Panel content must sit above the two pseudo-element layers. */
+    .panel > * { position: relative; z-index: 1; }
+
+    /* --- Tab bar --- */
+    .tabs {
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 5px;
+      border-radius: var(--radius);
+      background: linear-gradient(158deg,
+        rgba(255, 255, 255, 0.065) 0%,
+        rgba(255, 255, 255, 0.022) 100%),
+        rgba(9, 10, 13, 0.72);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 14px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .tab-btn {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      min-width: 108px;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--silver);
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .tab-btn:hover { background: var(--ink-600); color: var(--paper); }
+
+    /* Active tab: brushed champagne plate with near-black text. The one
+       piece of solid metal on the page. */
+    .tab-btn.active {
+      background: var(--metal);
+      background-size: 220% 100%;
+      color: #14100a;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 2px 12px rgba(216, 189, 133, 0.22);
+    }
+
+    /* Only the active panel shows; it grows to fill leftover height. */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; flex: 1 1 auto; }
+
+    /* ==========================================================================
+       5. ABOUT TAB
+       ========================================================================== */
+    .header-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.9fr);
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* Photo in a thin metal frame with a soft glow behind it. */
+    .header-photo { position: relative; }
+    .header-photo img {
+      width: 100%;
+      max-width: 290px;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(216, 189, 133, 0.28);
+      filter: saturate(0.92) contrast(1.04);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.55),
+        0 26px 58px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Contact links: small caps separated by hairlines. */
+    .links-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 26px;
+      max-width: none;
+    }
+    .links-row a {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.17em;
+      text-decoration: none;
+      color: var(--silver);
+      padding: 6px 20px 6px 0;
+      margin-right: 20px;
+      border-right: 1px solid var(--line);
+    }
+    .links-row a:last-child { border-right: none; margin-right: 0; }
+    .links-row a:hover { color: var(--gold-3); }
+
+    /* ==========================================================================
+       6. RESEARCH / TEACHING ROWS
+       ========================================================================== */
+    .project-row {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 36px;
+      align-items: start;
+      padding: 30px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+    .project-row:first-of-type { border-top: none; padding-top: 14px; }
+    .project-row .thumb img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Title of a project or paper. */
+    .papertitle {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 23px;
+      font-weight: 600;
+      line-height: 1.28;
+      color: var(--white);
+      margin-bottom: 7px;
+      max-width: var(--measure);
+    }
+
+    /* ==========================================================================
+       7. PUBLICATION ENTRIES
+       ========================================================================== */
+    .pub-entry {
+      padding: 24px 0;
+      border-top: 1px solid var(--line-soft);
+      max-width: var(--measure);
+    }
+    .pub-entry:first-of-type { border-top: none; }
+    .pub-entry ul { margin: 10px 0 0 0; padding-left: 18px; }
+    .pub-entry li { color: var(--silver); margin: 5px 0; }
+    .pub-meta {
+      display: inline-block;
+      font-size: 14px;
+      color: var(--silver);
+      margin-top: 2px;
+    }
+
+    /* Status chips. Three variants:
+         .pub-tag        → solid champagne  (published)
+         .pub-tag.alt    → outlined gold    (accepted / scheduled)
+         .pub-tag.warn   → dashed silver    (in preparation)                  */
+    .pub-tag {
+      display: inline-block;
+      padding: 4px 11px;
+      border-radius: 3px;
+      background: var(--metal);
+      background-size: 200% 100%;
+      color: #14100a;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 11px;
+      vertical-align: middle;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .pub-tag.alt {
+      background: rgba(216, 189, 133, 0.07);
+      color: var(--gold-2);
+      border: 1px solid rgba(216, 189, 133, 0.32);
+      box-shadow: none;
+    }
+    .pub-tag.warn {
+      background: transparent;
+      color: var(--silver-dim);
+      border: 1px dashed var(--ink-500);
+      box-shadow: none;
+    }
+
+    /* ==========================================================================
+       8. NEWS TAB
+       Each item is a row: date rail on the left, text + image on the right.
+       ========================================================================== */
+    .news-item {
+      display: grid;
+      grid-template-columns: 116px minmax(0, 1fr);
+      gap: 30px;
+      padding: 28px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+    .news-item:first-of-type { border-top: none; padding-top: 12px; }
+
+    .news-when {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--gold-2);
+      padding-top: 4px;
+      white-space: nowrap;
+    }
+
+    .news-body p { margin: 0; max-width: var(--measure); }
+
+    .news-figure { margin: 18px 0 0 0; max-width: 520px; }
+    .news-figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5);
+    }
+    .news-figure figcaption {
+      margin-top: 9px;
+      font-size: 13px;
+      color: var(--silver-dim);
+      line-height: 1.45;
+    }
+
+    /* Shown when the image file isn't in the repo yet. Script section B adds
+       .is-empty; the box then prints the filename it's waiting for. */
+    .news-figure.is-empty::before {
+      content: "Drop an image here → " attr(data-placeholder);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 136px;
+      padding: 16px;
+      border: 1px dashed var(--ink-500);
+      border-radius: 9px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--silver-dim);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    /* ==========================================================================
+       9. RESPONSIVE
+       ========================================================================== */
+    @media (max-width: 900px) {
+      :root { --gutter: 16px; --radius: 12px; }
+      .panel { padding: 26px 20px 30px 20px; }
+      .header-grid { grid-template-columns: 1fr; gap: 26px; }
+      .header-photo { order: -1; }
+      .header-photo img { margin: 0 auto; max-width: 220px; }
+      .project-row { grid-template-columns: 1fr; gap: 18px; }
+      .project-row .thumb img { max-width: 320px; }
+      .news-item { grid-template-columns: 1fr; gap: 10px; }
+      .tab-btn { min-width: 0; flex: 1 1 30%; padding: 11px 8px; letter-spacing: 0.12em; }
+    }
+
+    /* Anyone who asks their OS for reduced motion gets a still page. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background layers. Delete both lines to remove the animation. -->
+  <canvas id="flow-bg"></canvas>
+  <canvas id="glitter-bg"></canvas>
+
+  <div class="page-wrap">
+
+    <!-- ==========================================================================
+         TAB NAVIGATION
+         Each button's data-tab must match the id of a <section> below.
+         To add a tab: add a button here + a matching <section> down there.
+         ========================================================================== -->
+    <nav class="tabs" role="tablist" aria-label="Site sections">
+      <button class="tab-btn active" data-tab="about"        role="tab">About</button>
+      <button class="tab-btn"        data-tab="research"     role="tab">Research</button>
+      <button class="tab-btn"        data-tab="publications" role="tab">Publications</button>
+      <button class="tab-btn"        data-tab="fieldwork"    role="tab">Field Work</button>
+      <button class="tab-btn"        data-tab="teaching"     role="tab">Teaching</button>
+      <button class="tab-btn"        data-tab="news"         role="tab">News</button>
+    </nav>
+
+    <!-- ==========================================================================
+         ABOUT
+         ========================================================================== -->
+    <section id="about" class="tab-panel active panel" role="tabpanel">
+      <div class="header-grid">
+        <div>
+          <p class="name">Mohammad Abid Hasan</p>
+
+          <p>
+            I am a graduate student in Atmospheric Science at Texas Tech University, focusing on wind engineering and severe convective storms. My background is in Civil Engineering, and I previously worked on advanced infrastructure materials and structural health monitoring.
+          </p>
+
+          <p>
+            My current research focuses on the flow physics and pressure loading of tornado like vortices around low rise buildings. I use Large Eddy Simulation (LES) in OpenFOAM, high performance computing, and data driven analysis to study vortex generation with moving louvers and to develop surrogate models for predicting wind loads.
+          </p>
+
+          <p>
+            I am interested in problems at the intersection of wind engineering, computational fluid dynamics, and machine learning, with an eye toward resilient and efficient design of the built environment.
+          </p>
+
+          <!-- Contact links. Add or remove an <a> and the dividers adjust. -->
+          <p class="links-row">
+            <a href="mailto:has24395@ttu.edu">Email</a>
+            <a href="https://scholar.google.com/citations?user=2jdL18kAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+            <a href="https://github.com/abidhasan17" target="_blank" rel="noopener">GitHub</a>
+            <a href="CV_Abid_6_17.pdf" target="_blank" rel="noopener">CV</a>
+            <a href="https://www.linkedin.com/in/abid-hasan-351900261/" target="_blank" rel="noopener">LinkedIn</a>
+          </p>
+        </div>
+
+        <div class="header-photo">
+          <img src="Abid_Buet.jpg" alt="Mohammad Abid Hasan">
+        </div>
+      </div>
+
+      <hr class="rule">
+
+      <h3>Education</h3>
+      <ul>
+        <li><strong>Texas Tech University</strong>, M.S. in Atmospheric Science (Jan 2025 &ndash; Present). CGPA 4.00/4.00.</li>
+        <li><strong>Texas State University</strong>, M.S. in Civil Engineering (Sep 2024 &ndash; Dec 2024). CGPA 4.00/4.00.</li>
+        <li><strong>Bangladesh University of Engineering and Technology (BUET)</strong>, B.Sc. in Civil Engineering (Mar 2018 &ndash; May 2023). CGPA 3.52/4.00.</li>
+      </ul>
+
+      <h3>Research Interests</h3>
+      <ul>
+        <li>Wind engineering and computational wind engineering (CWE)</li>
+        <li>Building relevant winds (damaging straight line winds, thunderstorms, tornadoes); data assimilation</li>
+        <li>Disaster resilient built environment</li>
+        <li>AI accelerated computational fluid dynamics (CFD)</li>
+        <li>Urban canopy layer dynamics, urban heat island</li>
+        <li>Structural health monitoring, non destructive evaluation, smart infrastructure systems</li>
+      </ul>
+    </section>
+
+    <!-- ==========================================================================
+         RESEARCH
+         To add a project: copy one whole <div class="project-row"> block.
+         ========================================================================== -->
+    <section id="research" class="tab-panel panel" role="tabpanel">
+      <h2>Research</h2>
+
+      <div class="project-row">
+        <div class="thumb"><img src="TLV.png" alt="Tornado-like vortex simulation"></div>
+        <div>
+          <span class="papertitle">Large Eddy Simulation of Tornado Like Vortices Generated by Moving Louvers</span>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>Ongoing work</em>
+          <p>
+            I am developing a CFD framework in OpenFOAM to generate tornado like vortices using moving louvers in a boundary layer wind tunnel domain. The simulations use LES with dynamic mesh and Arbitrary Mesh Interface (AMI) to capture the vortex structure and its translation, and I analyze pressure and velocity fields around a low rise building model to study extreme pressure coefficients.
+          </p>
+        </div>
+      </div>
+
+      <div class="project-row">
+        <div class="thumb"><img src="TLV_Building.png" alt="TLV interacting with low-rise building"></div>
+        <div>
+          <span class="papertitle">Data Driven Surrogate Models for Vortex Induced Pressure Loading</span>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>Planned work</em>
+          <p>
+            I plan to build neural network based surrogate models that learn the relationship between CFD input parameters (inlet profile, louver motion, mesh resolution) and key flow features such as vortex location, translation speed, and minimum pressure coefficient on building surfaces. The goal is to replace expensive LES runs with fast predictors that still resolve critical wind loads.
+          </p>
+        </div>
+      </div>
+
+      <div class="project-row">
+        <div class="thumb"><img src="Abid_Poster.png" alt="Poster presentation on TLV CFD research"></div>
+        <div>
+          <span class="papertitle">Poster Presentation</span>
+          <strong>Mohammad Abid Hasan</strong><br>
+          <em>May 2, 2025</em>
+          <p>
+            On May 2, 2025, our research group presented a poster summarizing the overall research thrust and recent progress in CFD simulations, with a focus on tornado-like vortex generation and wind tunnel inspired numerical modeling.
+          </p>
+          <p>
+            <strong>Event:</strong> Celebrating Success and Excellence, Department of Geoscience, Texas Tech University.
+          </p>
+          <p><a href="Poster_May_2nd.pdf" target="_blank" rel="noopener">Poster (PDF)</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         PUBLICATIONS
+         Chip styles:  <span class="pub-tag">      solid champagne — published
+                       <span class="pub-tag alt">  outlined gold   — accepted
+                       <span class="pub-tag warn"> dashed silver   — in prep
+         ========================================================================== -->
+    <section id="publications" class="tab-panel panel" role="tabpanel">
+      <h2>Publications</h2>
+
+      <h3>Peer-reviewed journal</h3>
+      <div class="pub-entry">
+        <span class="pub-tag">Published</span><br>
+        <span class="papertitle">Advancing tornado-like vortex (TLV) generation in straight-line wind simulators: An LES study</span>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+        <span class="pub-meta">Journal of Wind Engineering and Industrial Aerodynamics, Volume 271, 2026, 106373, ISSN 0167-6105.</span><br>
+        <a href="https://doi.org/10.1016/j.jweia.2026.106373" target="_blank" rel="noopener">doi.org/10.1016/j.jweia.2026.106373</a>
+      </div>
+
+      <h3>Peer-reviewed journal (to be submitted)</h3>
+      <div class="pub-entry">
+        <span class="pub-tag warn">In preparation</span><br>
+        <span class="papertitle">Tornado-like vortex (TLV) induced loading in straight-line wind simulators</span>
+        Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>, Franklin T. Lombardo.
+      </div>
+
+      <h3>Conference presentations</h3>
+      <div class="pub-entry">
+        <span class="pub-tag alt">Oral, AMS 2026</span><br>
+        <span class="papertitle">Generating tornado-like vortices (TLVs) in straight-line simulators using moving louvers with LES</span>
+        <span class="pub-meta">Oral presentation at the 2026 AMS Annual Meeting, Houston, TX.</span>
+      </div>
+
+      <h3>Peer-reviewed conference abstracts (to be presented)</h3>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span><br>
+        <span class="papertitle">Advancing Tornado-Like Vortices (TLVs) Modeling in Straight-Line Simulators</span>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span><br>
+        <span class="papertitle">Digital twin of a supercell rear-flank downdraft (RFD) current in a computational domain using LES</span>
+        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Samuel Hanson, Jon Schroeder.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span><br>
+        <span class="papertitle">Investigating interference effects on aerodynamic loading under tornado-like vortices: An LES study</span>
+        Samuel Hanson, <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+      <div class="pub-entry">
+        <span class="pub-tag alt">ICWE 2026</span><br>
+        <span class="papertitle">AI/ML-Powered processing of near-surface anemometer network observation for enhancing CFD simulations of low-rise buildings under downburst events</span>
+        Guangzhao Chen, Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>.<br>
+        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         FIELD WORK
+         ========================================================================== -->
+    <section id="fieldwork" class="tab-panel panel" role="tabpanel">
+      <h2>Field Deployment</h2>
+
+      <div class="pub-entry">
+        <span class="papertitle">High-resolution ABL data around an instrumented cube &mdash; Lubbock, Texas</span>
+        <span class="pub-meta">25 Jun 2025 &ndash; 27 Jun 2025</span>
+        <ul>
+          <li>Deployed TTU StickNets to gather wind data at high spatial resolution.</li>
+          <li>Gathered high-resolution spatial and temporal wind velocity and pressure data around an instrumented cube.</li>
+        </ul>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Vortex-based flow system (dust devil) &mdash; Las Cruces, New Mexico</span>
+        <span class="pub-meta">29 Jun 2025 &ndash; 3 Jul 2025</span>
+        <ul>
+          <li>Deployed TTU StickNets and GoPro cameras to visualize and quantify loading on an instrumented cube induced by a dust devil.</li>
+          <li>Collected near-ground, high-resolution spatial and temporal thunderstorm outflow data.</li>
+        </ul>
+      </div>
+
+      <h3>Selected past projects</h3>
+      <div class="pub-entry">
+        <span class="papertitle">TxDOT 0-7206: Optimum 2-Mat Reinforcement Design in CRCP</span>
+        <ul>
+          <li>Conducted finite element simulations to optimize CRCP designs using ANSYS.</li>
+          <li>Coordinated field data collection and analyzed structural performance using Loggernet.</li>
+        </ul>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Real-Time Structural Health Monitoring &mdash; Kyle Fire Station</span>
+        <span class="pub-meta">Apr 2023 &ndash; Nov 2024</span>
+        <ul>
+          <li>Implemented a self-sensing concrete system with vibrating wire strain gauges.</li>
+          <li>Analyzed real-time data for infrastructure performance using Loggernet.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         TEACHING
+         ========================================================================== -->
+    <section id="teaching" class="tab-panel panel" role="tabpanel">
+      <h2>Teaching</h2>
+
+      <div class="project-row">
+        <div class="thumb"><img src="DIU.jpeg" alt="Dhaka International University"></div>
+        <div>
+          <span class="papertitle">Lecturer, Dhaka International University</span>
+          <span class="pub-meta">Aug 2023 &ndash; Jul 2024</span>
+          <p>I worked as a Lecturer in Civil Engineering at <strong>Dhaka International University</strong>, Dhaka, Bangladesh. I taught civil engineering courses, supervised student projects, guided thesis research, and developed course materials focused on structural engineering and fluid mechanics.</p>
+          <p>
+            <a href="https://profile.diu.ac/mohammadabidhasan#PersonalInformation" target="_blank" rel="noopener">DIU Academic Profile</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="pub-entry">
+        <span class="papertitle">Mentoring</span>
+        <span class="pub-meta">Spring 2026</span>
+        <p>Mentored an undergraduate student to develop a machine learning model (XGBoost) to accelerate numerical simulation.</p>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         NEWS
+
+         TEMPLATE — copy this block for a new item, newest at the top:
+
+         <article class="news-item">
+           <div class="news-when">2026&#8209;09</div>
+           <div class="news-body">
+             <p>What happened.</p>
+             <figure class="news-figure" data-placeholder="images/news/FILENAME.jpg">
+               <img src="images/news/FILENAME.jpg" alt="Describe the photo" loading="lazy">
+               <figcaption>Short caption.</figcaption>
+             </figure>
+           </div>
+         </article>
+
+         Notes:
+           - data-placeholder and the img src must be the SAME path.
+           - Until you add the file, a dashed box shows the filename it wants.
+           - No photo for an item? Delete the whole <figure> block.
+           - &#8209; is a non-breaking hyphen, so "2026-09" never wraps.
+         ========================================================================== -->
+    <section id="news" class="tab-panel panel" role="tabpanel">
+      <h2>News</h2>
+
+      <article class="news-item">
+        <div class="news-when">2026&#8209;06</div>
+        <div class="news-body">
+          <p>Planning to present my work on generation of translating tornado-like vortex in a BLWT CFD domain at <em>The 8th International Symposium on Computational Wind Engineering</em>, London, ON, Canada.</p>
+          <figure class="news-figure" data-placeholder="images/news/2026-06-icwe.jpg">
+            <img src="images/news/2026-06-icwe.jpg" alt="ICWE 2026 presentation" loading="lazy">
+            <figcaption>ICWE 2026, London, Ontario.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">2026&#8209;01</div>
+        <div class="news-body">
+          <p>Planning to present my work on generation of translating tornado-like vortex in a BLWT CFD domain at AMS 2026, Houston.</p>
+          <figure class="news-figure" data-placeholder="images/news/2026-01-ams.jpg">
+            <img src="images/news/2026-01-ams.jpg" alt="AMS 2026 Annual Meeting" loading="lazy">
+            <figcaption>AMS Annual Meeting, Houston, TX.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">2025&#8209;07</div>
+        <div class="news-body">
+          <p>Field deployment in Las Cruces, NM &mdash; instrumented cube + StickNets to capture dust devil loading.</p>
+          <figure class="news-figure" data-placeholder="images/news/2025-07-las-cruces.jpg">
+            <img src="images/news/2025-07-las-cruces.jpg" alt="Field deployment in Las Cruces, New Mexico" loading="lazy">
+            <figcaption>Instrumented cube and StickNets, Las Cruces, NM.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">2025&#8209;06</div>
+        <div class="news-body">
+          <p>Field deployment in Lubbock, TX &mdash; high-resolution ABL data around an instrumented cube.</p>
+          <figure class="news-figure" data-placeholder="images/news/2025-06-lubbock.jpg">
+            <img src="images/news/2025-06-lubbock.jpg" alt="Field deployment in Lubbock, Texas" loading="lazy">
+            <figcaption>StickNet deployment, Lubbock, TX.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">2025&#8209;05</div>
+        <div class="news-body">
+          <p>Presented a research poster at the Department of Geoscience Celebrating Success and Excellence event, TTU.</p>
+          <figure class="news-figure" data-placeholder="images/news/2025-05-poster.jpg">
+            <img src="images/news/2025-05-poster.jpg" alt="Poster presentation at Texas Tech University" loading="lazy">
+            <figcaption>Celebrating Success and Excellence, TTU.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">2025&#8209;01</div>
+        <div class="news-body">
+          <p>Joined the Atmospheric Science program at Texas Tech University.</p>
+          <figure class="news-figure" data-placeholder="images/news/2025-01-ttu.jpg">
+            <img src="images/news/2025-01-ttu.jpg" alt="Texas Tech University" loading="lazy">
+            <figcaption>Texas Tech University, Lubbock, TX.</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="news-item">
+        <div class="news-when">Earlier</div>
+        <div class="news-body">
+          <p>Completed my Civil Engineering studies and worked on self sensing concrete and infrastructure materials.</p>
+          <figure class="news-figure" data-placeholder="images/news/earlier-buet.jpg">
+            <img src="images/news/earlier-buet.jpg" alt="Civil engineering work" loading="lazy">
+            <figcaption>Self-sensing concrete and infrastructure materials.</figcaption>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+  </div><!-- /.page-wrap -->
+
+
+  <!-- ==========================================================================
+       SCRIPTS
+       A. tab switching   B. news image fallback   C. background animation
+       ========================================================================== -->
+  <script>
+  /* --------------------------------------------------------------------------
+     A. TAB SWITCHING
+     Shows one section at a time and keeps the URL hash in sync, so
+     yoursite.com/#research opens straight to the Research tab.
+     -------------------------------------------------------------------------- */
+  (function () {
+    const buttons = document.querySelectorAll('.tab-btn');
+    const panels  = document.querySelectorAll('.tab-panel');
+
+    function activate(name) {
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      panels.forEach(p  => p.classList.toggle('active', p.id === name));
+      if (history.replaceState) history.replaceState(null, '', '#' + name);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => activate(btn.dataset.tab));
+    });
+
+    // Open the tab named in the URL, if there is one.
+    const initial = (location.hash || '').replace('#', '');
+    if (initial && document.getElementById(initial)) activate(initial);
+
+    // Back / forward buttons.
+    window.addEventListener('hashchange', () => {
+      const h = (location.hash || '').replace('#', '');
+      if (h && document.getElementById(h)) activate(h);
+    });
+  })();
+
+
+  /* --------------------------------------------------------------------------
+     B. NEWS IMAGE FALLBACK
+     If a news image file isn't in the repo, swap it for a dashed box naming
+     the file it's waiting for. Nothing to configure — it reads the
+     data-placeholder attribute on each <figure>.
+     -------------------------------------------------------------------------- */
+  (function () {
+    function markEmpty(img) {
+      const fig = img.closest('.news-figure');
+      if (fig) {
+        fig.classList.add('is-empty');
+        const cap = fig.querySelector('figcaption');
+        if (cap) cap.style.display = 'none';   // hide caption until image exists
+      }
+      img.remove();
+    }
+
+    document.querySelectorAll('.news-figure img').forEach(img => {
+      if (img.complete && img.naturalWidth === 0) { markEmpty(img); return; }
+      img.addEventListener('error', () => markEmpty(img));
+    });
+  })();
+
+
+  /* --------------------------------------------------------------------------
+     C. BACKGROUND — wind streaklines + glitter
+
+     Two canvases share one animation loop:
+
+       flow    — particles advected through a 2D velocity field, drawn as short
+                 streaks. Trails come from painting the page colour over the
+                 canvas at low alpha each frame instead of clearing it.
+                 The field is a mean wind in +x plus three scales of sinusoidal
+                 eddies — a cheap stand-in for turbulence, no noise library.
+
+       glitter — sparse motes that drift slowly and pulse in brightness. Drawn
+                 on their own canvas which IS cleared each frame, so they
+                 sparkle instead of smearing.
+
+     KNOBS are collected below. Everything else can stay as is.
+     -------------------------------------------------------------------------- */
+  (function () {
+    const flowCanvas    = document.getElementById('flow-bg');
+    const glitterCanvas = document.getElementById('glitter-bg');
+    if (!flowCanvas || !glitterCanvas) return;   // canvases deleted — stop here
+
+    const fx = flowCanvas.getContext('2d');
+    const gx = glitterCanvas.getContext('2d');
+    let W, H, DPR;
+
+    /* ===== KNOBS ========================================================== */
+    const speedScale   = 1.25;    // how fast the wind streaks travel
+    const fadeAlpha    = 0.085;   // streak length. LOWER = longer trails
+    const flowDensity  = 3400;    // one streak particle per N pixels of screen
+    const moteDensity  = 26000;   // one mote per N pixels. LOWER = more glitter
+    const moteMaxSize  = 1.9;     // radius in px of the biggest motes
+    const starThreshold= 1.45;    // motes bigger than this get a 4-point flare
+    /* ====================================================================== */
+
+    function resize() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      [flowCanvas, glitterCanvas].forEach(c => {
+        c.width  = W * DPR;
+        c.height = H * DPR;
+        c.style.width  = W + 'px';
+        c.style.height = H + 'px';
+      });
+      fx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      gx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
+
+    /* --- Velocity field. Given a point and a time, returns (vx, vy). ------- */
+    function flow(x, y, t, out) {
+      const nx = x / W;                 // normalised 0..1 across the screen
+      const ny = y / H;                 // 0 at top, 1 at bottom
+
+      // Mean wind, stronger near the "ground" at the bottom of the screen.
+      const mean = 0.55 + 0.65 * ny;
+
+      // Large eddies
+      const e1x = Math.sin(ny *  6.0 + t * 0.6) * 0.70;
+      const e1y = Math.cos(nx *  4.0 + t * 0.5) * 0.50;
+      // Medium eddies
+      const e2x = Math.sin(ny * 14.0 - t * 1.1 + nx * 3.0) * 0.35;
+      const e2y = Math.cos(nx * 10.0 + t * 0.9 + ny * 5.0) * 0.35;
+      // Fine-scale fluctuations
+      const e3x = Math.sin(nx * 28.0 + ny * 22.0 + t * 1.8) * 0.15;
+      const e3y = Math.cos(nx * 24.0 - ny * 26.0 - t * 1.6) * 0.15;
+
+      out.vx = mean + e1x + e2x + e3x;
+      out.vy =        e1y + e2y + e3y;
+    }
+
+    /* --- Particle sets, rebuilt whenever the window changes size ----------- */
+    let streaks = [];
+    let motes   = [];
+
+    function buildStreaks() {
+      const n = Math.max(200, Math.min(800, Math.round((W * H) / flowDensity)));
+      streaks = [];
+      for (let i = 0; i < n; i++) {
+        streaks.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          life: 120 + Math.random() * 200,   // frames before respawn
+          age:  Math.random() * 120,
+          z:    0.35 + Math.random() * 0.65, // depth: line weight + brightness
+        });
+      }
+    }
+
+    function buildMotes() {
+      const n = Math.max(24, Math.min(120, Math.round((W * H) / moteDensity)));
+      motes = [];
+      for (let i = 0; i < n; i++) {
+        motes.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: 0.5 + Math.random() * moteMaxSize,
+          drift: 0.05 + Math.random() * 0.22,   // slow rightward drift
+          bob:   Math.random() * Math.PI * 2,   // vertical wander phase
+          phase: Math.random() * Math.PI * 2,   // twinkle phase
+          rate:  0.006 + Math.random() * 0.02,  // twinkle speed
+          warm:  Math.random() < 0.55,          // champagne vs white sparkle
+        });
+      }
+    }
+
+    function rebuild() { resize(); buildStreaks(); buildMotes(); }
+    buildStreaks();
+    buildMotes();
+    window.addEventListener('resize', rebuild);
+
+    const v = { vx: 0, vy: 0 };
+
+    function frame() {
+      /* ---------- Layer 1: wind streaklines ------------------------------- */
+      // Paint the page colour over the canvas at low alpha. Old streaks fade
+      // out gradually instead of being erased — that's what makes the trails.
+      fx.fillStyle = 'rgba(6, 7, 9, ' + fadeAlpha + ')';
+      fx.fillRect(0, 0, W, H);
+
+      const t = performance.now() * 0.0004;
+      fx.lineCap = 'round';
+
+      for (const p of streaks) {
+        flow(p.x, p.y, t, v);
+        const nx = p.x + v.vx * speedScale;
+        const ny = p.y + v.vy * speedScale;
+
+        // Fade in at birth, out at death, so streaks never pop in or out.
+        const fade  = Math.sin((p.age / p.life) * Math.PI);
+        const alpha = (0.09 + 0.30 * p.z) * fade;
+
+        // Slightly warm platinum filament, brighter for "nearer" particles.
+        const tone = Math.round(176 + 62 * p.z);
+        fx.strokeStyle = 'rgba(' + (tone + 10) + ',' + (tone + 4) + ',' + (tone - 8) + ',' + alpha.toFixed(3) + ')';
+        fx.lineWidth = 0.5 + 1.05 * p.z;
+
+        fx.beginPath();
+        fx.moveTo(p.x, p.y);
+        fx.lineTo(nx, ny);
+        fx.stroke();
+
+        p.x = nx;
+        p.y = ny;
+        p.age++;
+
+        // Respawn once off-screen or aged out. Mostly on the left edge, so the
+        // net left-to-right flow keeps going.
+        if (p.x > W + 5 || p.y < -5 || p.y > H + 5 || p.age > p.life) {
+          if (Math.random() < 0.85) { p.x = -5; p.y = Math.random() * H; }
+          else                      { p.x = Math.random() * W; p.y = Math.random() * H; }
+          p.age  = 0;
+          p.life = 120 + Math.random() * 200;
+          p.z    = 0.35 + Math.random() * 0.65;
+        }
+      }
+
+      /* ---------- Layer 2: glitter ---------------------------------------- */
+      gx.clearRect(0, 0, W, H);   // cleared, not faded — motes stay crisp
+
+      for (const m of motes) {
+        m.phase += m.rate;
+        m.bob   += 0.004;
+        m.x     += m.drift;
+        m.y     += Math.sin(m.bob) * 0.12;
+
+        if (m.x > W + 4) { m.x = -4; m.y = Math.random() * H; }
+
+        // Twinkle: raised to a power so motes spend most of their time dim
+        // and flare briefly. Change the exponent for a snappier sparkle.
+        const tw = Math.pow((Math.sin(m.phase) + 1) * 0.5, 2.4);
+        const a  = 0.10 + 0.80 * tw;
+
+        // Champagne or plain white, decided once at build time.
+        const col = m.warm ? '246, 232, 200' : '255, 255, 255';
+
+        // Halo
+        gx.fillStyle = 'rgba(' + col + ',' + (a * 0.18).toFixed(3) + ')';
+        gx.beginPath();
+        gx.arc(m.x, m.y, m.r * 3.2, 0, Math.PI * 2);
+        gx.fill();
+
+        // Core
+        gx.fillStyle = 'rgba(' + col + ',' + a.toFixed(3) + ')';
+        gx.beginPath();
+        gx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        gx.fill();
+
+        // Four-point flare on the biggest motes at the peak of a twinkle.
+        if (m.r > starThreshold && tw > 0.72) {
+          const len = m.r * (5 + 5 * tw);
+          gx.strokeStyle = 'rgba(' + col + ',' + (a * 0.5).toFixed(3) + ')';
+          gx.lineWidth = 0.6;
+          gx.beginPath();
+          gx.moveTo(m.x - len, m.y); gx.lineTo(m.x + len, m.y);
+          gx.moveTo(m.x, m.y - len); gx.lineTo(m.x, m.y + len);
+          gx.stroke();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    // Anyone who asked their OS for reduced motion gets a still page.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      fx.fillStyle = 'rgba(6, 7, 9, 1)';
+      fx.fillRect(0, 0, W, H);
+    } else {
+      requestAnimationFrame(frame);
+    }
+  })();
+  </script>
+
+</body>
+</html>
