@@ -6,7 +6,7 @@
   <meta name="keywords" content="wind engineering, CFD, tornado vortex, OpenFOAM, LES, atmospheric science, Texas Tech, boundary layer wind tunnel">
   <title>Mohammad Abid Hasan</title>
   <meta name="author" content="Mohammad Abid Hasan">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
 
@@ -37,18 +37,42 @@
                                  Two families only: obsidian (the dark) and
                                  champagne (the metal). Everything else on the
                                  page is built from those.
+  Change how wide the page is .. --page-max in :root. On a screen wider than
+                                 that, the page is centred, not stretched.
   Change how wide text runs .... --measure in :root
+  Make everything bigger or
+  smaller on large monitors .... the html { font-size } rule under PAGE BASE.
+                                 Every size on the page follows it.
   More / less glitter .......... moteShare, in the wind-flow script
   Add / remove a tab ........... 2 places: the tab buttons in the nav bar,
                                  AND a matching section below it. The button's
                                  data-tab value must equal the section's id.
   Add a news item .............. NEWS section — copy the template comment there
   Add a publication ............ PUBLICATIONS section — copy any .pub-entry
+                                 inside the group it belongs to
   Add a research project ....... RESEARCH section — copy any .project-row
   Turn the background off ...... delete the canvas element in the body,
                                  or set opacity: 0 on #flow-bg in the CSS
   Tune the background .......... the KNOBS block in the wind-flow script,
                                  bottom of the file
+
+  --------------------------------------------------------------------------
+  SCREEN SIZES
+  --------------------------------------------------------------------------
+
+  One layout that adapts to the screen. All of it is in the CSS; there is
+  nothing to maintain per device.
+
+    Phones (up to 640px wide) ....... everything in one column, tabs in two
+                                      rows of three.
+    Tablets (641 to 864px) .......... photo and thumbnails beside the text,
+                                      the other blocks in one column.
+    Laptops and desktops ............ the full multi-column layout.
+    Large monitors (past 1280px) .... same layout, scaled up smoothly and
+                                      centred on the screen.
+
+  The breakpoints are the two @media blocks under RESPONSIVE at the end of
+  the CSS.
 
   --------------------------------------------------------------------------
   IMAGES
@@ -61,6 +85,11 @@
 
   If a news image file isn't there yet, the page shows a dashed box naming the
   file it's waiting for. Nothing breaks. That's handled in the script.
+
+  The research and teaching thumbnails carry width="" and height="" (the
+  file's size in pixels) so the page can hold their space before they load,
+  and loading="lazy" so a phone only downloads them when their tab is opened.
+  When you swap in a new image, update the two numbers, or just delete them.
 
 ================================================================================
 -->
@@ -106,16 +135,42 @@
       --font-display: 'Cormorant Garamond', Garamond, Georgia, serif;
       --font-body:    'Lato', Verdana, Helvetica, sans-serif;
 
-      /* --- Layout ------------------------------------------------------------ */
-      --measure:   76ch;   /* max line length for paragraphs.
-                              Set to "none" if you want text edge-to-edge.    */
-      --gutter:    34px;   /* space between content and screen edge           */
-      --radius:    14px;   /* corner rounding on panels                       */
+      /* --- Layout ------------------------------------------------------------
+         Sizes are in rem, and the rem itself grows with the screen (see the
+         html rule in PAGE BASE), so everything here scales together. The
+         clamp() values are "smallest, preferred, largest": they shrink on a
+         phone and stop growing on a big monitor.                             */
+      --page-max:  72rem;   /* widest the content gets. On a wider screen the
+                               page is centred instead of stretched.          */
+      --measure:   48rem;   /* max line length for paragraphs and lists       */
+      --gutter:    clamp(0.75rem, 2.6vw, 2.125rem);   /* content to screen edge */
+      --pad-x:     clamp(1.125rem, 4vw, 2.75rem);     /* padding inside panels  */
+      --pad-y:     clamp(1.5rem, 3.6vw, 2.5rem);
+      --side:      clamp(11rem, 30%, 20rem);    /* photo / thumbnail column    */
+      --rail:      clamp(10rem, 24%, 16rem);    /* label column (Publications) */
+      --col-gap:   clamp(1.5rem, 4.5%, 3rem);   /* space between columns       */
+      --radius:    0.875rem;   /* corner rounding on panels                    */
     }
 
     /* ==========================================================================
        2. PAGE BASE
        ========================================================================== */
+
+    /* Fluid scale. 1rem is 16px on phones, tablets and laptops, then grows
+       with the window: 18px at 1920 wide, 20px at 2560 (a 27-28" 4K monitor),
+       and stops at 24px. Every size on this page is in rem, so text, spacing
+       and images grow together and the page keeps its proportions on a big
+       display instead of sitting small in one corner of it.
+       To switch the scaling off, use:  font-size: 100%;                      */
+    html {
+      font-size: clamp(100%, 75% + 0.3125vw, 150%);
+      -webkit-text-size-adjust: 100%;   /* phones: no auto-enlarged text      */
+      text-size-adjust: 100%;
+      color-scheme: dark;               /* dark scrollbar to match the page   */
+      scrollbar-gutter: stable;         /* no sideways jump between a short
+                                           tab and one long enough to scroll  */
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -127,7 +182,12 @@
       color: var(--paper);
       font-family: var(--font-body);
       -webkit-font-smoothing: antialiased;
+      overflow-wrap: break-word;   /* a long link wraps instead of pushing
+                                      the page wider than the screen          */
     }
+
+    /* Nothing is allowed to be wider than the column it sits in. */
+    img, video { max-width: 100%; height: auto; }
 
     /* Warm bloom near the top of the screen — light falling on the obsidian.
        Two layers: a faint gold wash and a cooler white lift behind it.
@@ -148,26 +208,39 @@
           rgba(255, 255, 255, 0) 60%);
     }
 
-    /* Wind-flow canvas — fixed to the viewport, sits behind all content. */
+    /* Wind-flow canvas — fixed to the viewport, sits behind all content.
+       100lvh is the screen height with a phone's address bar hidden, so the
+       canvas doesn't have to resize every time that bar slides in or out. */
     #flow-bg {
       position: fixed;
-      inset: 0;
-      width: 100vw;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100vh;
+      height: 100lvh;
+      max-width: none;
       z-index: 0;
       pointer-events: none;
       opacity: 0.6;   /* overall strength of the animation */
     }
 
-    /* Content wrapper. Flex column so the active panel can stretch down
-       and fill the screen even when a tab has little content. */
+    /* Content wrapper. Centred, and never wider than --page-max. Flex column
+       so the active panel can stretch down and fill the screen even when a
+       tab has little content. The env() values keep content clear of the
+       notch and rounded corners on phones. */
     .page-wrap {
       position: relative;
       z-index: 1;
-      max-width: 100%;
+      width: 100%;
+      max-width: calc(var(--page-max) + 2 * var(--gutter));
       margin: 0 auto;
-      padding: 22px var(--gutter) 60px var(--gutter);
+      padding:
+        1.375rem
+        max(var(--gutter), env(safe-area-inset-right))
+        max(clamp(1.5rem, 5vw, 3.75rem), env(safe-area-inset-bottom))
+        max(var(--gutter), env(safe-area-inset-left));
       min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -179,7 +252,7 @@
        ========================================================================== */
     body, td, th, tr, p, a, li, strong {
       font-family: var(--font-body);
-      font-size: 16px;
+      font-size: 1rem;
       color: var(--paper);
     }
 
@@ -191,32 +264,33 @@
        letterspacing opened up — the type is the ornament here. */
     .name {
       font-family: var(--font-display);
-      font-size: clamp(40px, 5.4vw, 68px);
+      font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4.25rem);
       font-weight: 300;
       letter-spacing: 0.012em;
       line-height: 1.04;
       color: var(--paper);
       padding-top: 0;
-      margin: 0 0 6px 0;
+      margin: 0 0 0.375rem 0;
+      text-wrap: balance;   /* if it wraps on a phone, no lone word is left */
     }
 
     /* Thin gold rule under the name. */
     .name-rule {
-      width: 84px;
+      width: 5.25rem;
       height: 1px;
-      margin: 0 0 22px 0;
+      margin: 0 0 1.375rem 0;
       background: linear-gradient(90deg, var(--gold) 0%, rgba(203, 176, 120, 0) 100%);
     }
 
     /* Tab headings ("Research", "Publications", ...). */
     h2 {
       font-family: var(--font-display);
-      font-size: clamp(30px, 2.8vw, 42px);
+      font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.625rem);
       font-weight: 300;
       letter-spacing: 0.01em;
       color: var(--paper);
-      margin: 0 0 22px 0;
-      padding-bottom: 16px;
+      margin: 0 0 1.375rem 0;
+      padding-bottom: 1rem;
       border-bottom: 1px solid var(--line-soft);
       position: relative;
     }
@@ -226,7 +300,7 @@
       position: absolute;
       left: 0;
       bottom: -1px;
-      width: 64px;
+      width: 4rem;
       height: 1px;
       background: var(--gold);
     }
@@ -235,12 +309,12 @@
        Body face, uppercase, gold — they read as labels, not titles. */
     h3 {
       font-family: var(--font-body);
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.2em;
       color: var(--gold);
-      margin: 36px 0 14px 0;
+      margin: 2.25rem 0 0.875rem 0;
     }
 
     /* Links: warm white with a gold underline that lights up on hover. */
@@ -271,7 +345,7 @@
     .rule {
       border: none;
       height: 1px;
-      margin: 30px 0;
+      margin: 1.875rem 0;
       background: linear-gradient(90deg,
         rgba(203, 176, 120, 0.42) 0%,
         rgba(255, 255, 255, 0.07) 22%,
@@ -297,8 +371,8 @@
         var(--glass-fill);
       border: 1px solid var(--edge);
       border-radius: var(--radius);
-      padding: 40px 42px 46px 42px;
-      margin: 16px 0 0 0;
+      padding: var(--pad-y) var(--pad-x) calc(var(--pad-y) + 0.375rem) var(--pad-x);
+      margin: 1rem 0 0 0;
       backdrop-filter: blur(16px) saturate(1.15);
       -webkit-backdrop-filter: blur(16px) saturate(1.15);
       box-shadow:
@@ -341,15 +415,18 @@
     /* Panel content sits above the two decorative layers. */
     .panel > * { position: relative; z-index: 1; }
 
-    /* Tab bar. Sticks to the top of the screen while you scroll. */
+    /* Tab bar. Sticks to the top of the screen while you scroll. The tabs
+       share the width equally in one row, however many there are; on phones
+       they become rows of three (see RESPONSIVE). */
     .tabs {
       position: sticky;
-      top: 10px;
+      top: max(0.625rem, env(safe-area-inset-top));
       z-index: 5;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      padding: 5px;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      gap: 0.25rem;
+      padding: 0.3125rem;
       background: var(--glass-tabs);
       border: 1px solid var(--edge);
       border-radius: var(--radius);
@@ -361,18 +438,18 @@
     }
 
     .tab-btn {
-      flex: 1 1 auto;
-      min-width: 108px;
-      padding: 13px 16px;
+      min-width: 0;
+      padding: 0.8125rem 0.5rem;
       border: none;
-      border-radius: 9px;
+      border-radius: 0.5625rem;
       background: transparent;
       color: var(--silver);
       font-family: var(--font-body);
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.17em;
+      white-space: nowrap;
       cursor: pointer;
       transition: background 0.18s ease, color 0.18s ease;
     }
@@ -387,30 +464,35 @@
         0 6px 20px var(--gold-glow);
     }
 
-    /* Only the active panel is shown; it grows to fill leftover height. */
-    .tab-panel { display: none; }
+    /* Only the active panel is shown; it grows to fill leftover height.
+       The scroll margin is for links that open straight to a tab (...#news):
+       the browser would otherwise jump to the panel and tuck its top under
+       the sticky tab bar. With the margin the page simply stays at the top. */
+    .tab-panel { display: none; scroll-margin-top: 100vh; }
     .tab-panel.active { display: block; flex: 1 1 auto; }
 
     /* ==========================================================================
        5. ABOUT TAB
        ========================================================================== */
+
+    /* Bio on the left, photo on the right. The photo column is a share of
+       the panel (--side), so the two stay in proportion at every width. */
     .header-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.9fr);
-      gap: 48px;
+      grid-template-columns: minmax(0, 1fr) var(--side);
+      column-gap: var(--col-gap);
+      row-gap: 1.5rem;
       align-items: start;
     }
 
     /* Photo in a thin gold frame, floating on a warm shadow. */
     .header-photo img {
       width: 100%;
-      max-width: 290px;
       height: auto;
       display: block;
-      border-radius: 10px;
-      margin-left: auto;
+      border-radius: 0.625rem;
       border: 1px solid var(--edge-gold);
-      padding: 5px;
+      padding: 0.3125rem;
       background: linear-gradient(158deg, rgba(234, 214, 171, 0.12), rgba(203, 176, 120, 0.03));
       box-shadow:
         0 24px 52px rgba(0, 0, 0, 0.6),
@@ -418,70 +500,99 @@
       box-sizing: border-box;
     }
 
-    /* Row of links under the bio, separated by thin gold dividers. */
+    /* Row of links under the bio, separated by thin gold dividers.
+       Each divider belongs to the link on its right and sits out in the gap.
+       When a link wraps to the start of a new line its divider lands outside
+       the row and is clipped, so no divider is ever left dangling. The
+       padding (cancelled by the negative margin) is room for the focus ring. */
     .links-row {
       display: flex;
       flex-wrap: wrap;
-      margin-top: 28px;
+      gap: 0.25rem 2.5rem;
       max-width: none;
+      margin: 1.375rem -0.375rem 0.625rem -0.375rem;
+      padding: 0.375rem;
+      overflow: hidden;
     }
     .links-row a {
-      font-size: 11px;
+      position: relative;
+      font-size: 0.6875rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.17em;
       text-decoration: none;
       color: var(--silver);
-      padding: 6px 20px 6px 0;
-      margin-right: 20px;
-      border-right: 1px solid rgba(203, 176, 120, 0.22);
+      padding: 0.375rem 0;
     }
-    .links-row a:last-child { border-right: none; margin-right: 0; }
+    .links-row a + a::before {
+      content: "";
+      position: absolute;
+      left: -1.25rem;
+      top: 0.25rem;
+      bottom: 0.25rem;
+      width: 1px;
+      background: rgba(203, 176, 120, 0.22);
+    }
     .links-row a:hover { color: var(--gold-light); }
+
+    /* Education | Research Interests, side by side under the bio. Each half
+       is a plain <div> holding an h3 and a list. One column on small screens. */
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--col-gap);
+      row-gap: 1.75rem;
+    }
+    .split h3 { margin-top: 0.375rem; }
+    .split ul { margin: 0; padding-left: 1.25rem; }
+    .split li { margin: 0.25rem 0; }
 
     /* ==========================================================================
        6. RESEARCH / TEACHING ROWS
+       Thumbnail on the left, text on the right.
        ========================================================================== */
     .project-row {
       display: grid;
-      grid-template-columns: 250px minmax(0, 1fr);
-      gap: 36px;
+      grid-template-columns: var(--side) minmax(0, 1fr);
+      column-gap: var(--col-gap);
+      row-gap: 1.125rem;
       align-items: start;
-      padding: 32px 0;
+      padding: 2rem 0;
       border-top: 1px solid var(--line-soft);
     }
-    .project-row:first-of-type { border-top: none; padding-top: 12px; }
+    .project-row:first-of-type { border-top: none; padding-top: 0.75rem; }
     .project-row .thumb img {
       width: 100%;
       height: auto;
       display: block;
-      border-radius: 8px;
+      border-radius: 0.5rem;
       border: 1px solid var(--edge-gold);
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
     }
 
-    /* Full-width variant — drops the thumbnail column. Use it on rows that
-       carry a video or a wide figure instead of a small image:
+    /* No-thumbnail variant. The content sits in the text column, lined up
+       with the rows around it, and the thumbnail column is left empty. Use
+       it for a row that carries a video or a wide figure, or has no image:
        <div class="project-row wide"> ... </div>                            */
-    .project-row.wide { grid-template-columns: minmax(0, 1fr); }
+    .project-row.wide > * { grid-column: 2; }
 
     /* Video inside a research row. Framed like the thumbnails above. */
     .project-video {
-      margin: 20px 0 0 0;
-      max-width: 860px;
+      margin: 1.25rem 0 0 0;
+      max-width: 54rem;
     }
     .project-video video {
       width: 100%;
       height: auto;
       display: block;
-      border-radius: 8px;
+      border-radius: 0.5rem;
       border: 1px solid var(--edge-gold);
       background: #000;
       box-shadow: 0 18px 42px rgba(0, 0, 0, 0.6);
     }
     .project-video figcaption {
-      margin-top: 10px;
-      font-size: 13px;
+      margin-top: 0.625rem;
+      font-size: 0.8125rem;
       color: var(--silver-dim);
       line-height: 1.45;
     }
@@ -490,34 +601,57 @@
     .papertitle {
       display: block;
       font-family: var(--font-display);
-      font-size: 25px;
+      font-size: clamp(1.3125rem, 1.1rem + 0.9vw, 1.5625rem);
       font-weight: 400;
       line-height: 1.28;
       letter-spacing: 0.005em;
       color: var(--paper);
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
       max-width: var(--measure);
     }
 
     /* ==========================================================================
        7. PUBLICATION ENTRIES
        ========================================================================== */
+
+    /* A group is one labelled block: the h3 label sits in a column on the
+       left and its entries on the right, like a CV. On tablets and phones
+       the label moves above the entries (see RESPONSIVE). */
+    .group {
+      display: grid;
+      grid-template-columns: var(--rail) minmax(0, 1fr);
+      column-gap: var(--col-gap);
+      padding: 1.875rem 0 0.375rem 0;
+      border-top: 1px solid var(--line-soft);
+    }
+    .group:first-of-type { border-top: none; padding-top: 0.625rem; }
+    .group > h3 { margin: 0.1875rem 0 0 0; line-height: 1.7; }
+
     .pub-entry {
-      padding: 26px 0;
+      padding: 1.625rem 0;
       border-top: 1px solid var(--line-soft);
       max-width: var(--measure);
     }
     .pub-entry:first-of-type { border-top: none; }
-    .pub-entry ul { margin: 12px 0 0 0; padding-left: 18px; }
-    .pub-entry li { color: var(--silver); margin: 6px 0; }
+    .group .pub-entry:first-of-type { padding-top: 0; }
+    .pub-entry ul { margin: 0.75rem 0 0 0; padding-left: 1.125rem; }
+    .pub-entry li { color: var(--silver); margin: 0.375rem 0; }
     .pub-entry li::marker { color: var(--gold-deep); }
     .pub-meta {
       display: inline-block;
       font-style: normal;
-      font-size: 14px;
+      font-size: 0.875rem;
       color: var(--silver);
-      margin-top: 3px;
+      margin-top: 0.1875rem;
     }
+
+    /* Entries laid out two across (Field Work). One column on small screens. */
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--col-gap);
+    }
+    .entry-grid .pub-entry { border-top: none; padding: 0.5rem 0 1.25rem 0; }
 
     /* Status chips. Three variants, all in the same metal:
          .pub-tag        → solid gold  (published)
@@ -525,16 +659,16 @@
          .pub-tag.warn   → dashed grey (in preparation) */
     .pub-tag {
       display: inline-block;
-      padding: 4px 11px;
+      padding: 0.25rem 0.6875rem;
       border-radius: 3px;
       background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
       color: #17140e;
       border: 1px solid var(--gold);
-      font-size: 10px;
+      font-size: 0.625rem;
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
       vertical-align: middle;
       box-shadow: 0 3px 12px var(--gold-glow);
     }
@@ -557,43 +691,54 @@
        ========================================================================== */
     .news-item {
       display: grid;
-      grid-template-columns: 118px minmax(0, 1fr);
-      gap: 30px;
-      padding: 30px 0;
+      grid-template-columns: 7rem minmax(0, 1fr);
+      column-gap: clamp(1rem, 3%, 1.875rem);
+      row-gap: 0.5rem;
+      padding: 1.875rem 0;
       border-top: 1px solid var(--line-soft);
     }
-    .news-item:first-of-type { border-top: none; padding-top: 12px; }
+    .news-item:first-of-type { border-top: none; padding-top: 0.75rem; }
 
     /* The date rail, set in gold. */
     .news-when {
       font-family: var(--font-body);
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.17em;
       color: var(--gold-deep);
-      padding-top: 4px;
+      padding-top: 0.25rem;
       white-space: nowrap;
     }
 
-    .news-body p { margin: 0; max-width: var(--measure); }
+    /* Text on top, photos underneath. Two photos sit side by side when
+       there is room for both, and stack when there isn't. */
+    .news-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+      column-gap: 1.25rem;
+    }
+    .news-body p { grid-column: 1 / -1; margin: 0; max-width: var(--measure); }
 
     /* Image slot under each news item. */
     .news-figure {
-      margin: 18px 0 0 0;
-      max-width: 540px;
+      margin: 1.125rem 0 0 0;
+      min-width: 0;
     }
     .news-figure img {
-      width: 100%;
+      width: auto;
+      max-width: 100%;
       height: auto;
+      max-height: 28rem;   /* stops a tall portrait photo filling the screen */
       display: block;
-      border-radius: 8px;
+      border-radius: 0.5rem;
       border: 1px solid var(--edge-gold);
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      box-sizing: border-box;
     }
     .news-figure figcaption {
-      margin-top: 10px;
-      font-size: 13px;
+      margin-top: 0.625rem;
+      font-size: 0.8125rem;
       color: var(--silver-dim);
       line-height: 1.45;
     }
@@ -605,11 +750,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 136px;
-      padding: 16px;
+      min-height: 8.5rem;
+      padding: 1rem;
       border: 1px dashed rgba(203, 176, 120, 0.28);
-      border-radius: 8px;
-      font-size: 12px;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
       letter-spacing: 0.07em;
       color: var(--silver-dim);
       text-align: center;
@@ -618,17 +763,71 @@
 
     /* ==========================================================================
        9. RESPONSIVE
+       The rules above are the wide layout: laptops, desktops, and tablets
+       held sideways. Screens larger than a laptop need nothing extra — the
+       fluid rem in PAGE BASE and the centred --page-max take care of them.
+       Below are the adjustments for smaller screens.
+       (In a media query 1rem is always 16px, so 54rem = 864px, 40rem = 640px.)
        ========================================================================== */
-    @media (max-width: 900px) {
-      :root { --gutter: 16px; }
-      .panel { padding: 28px 22px 32px 22px; }
-      .header-grid { grid-template-columns: 1fr; gap: 28px; }
+
+    /* Tablets held upright, phones held sideways. The side-by-side text
+       blocks drop to one column and the tab labels tighten to fit one row. */
+    @media (max-width: 54rem) {
+      .tab-btn {
+        font-size: clamp(0.5625rem, 1.5vw, 0.6875rem);
+        letter-spacing: 0.08em;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+      }
+
+      .split,
+      .entry-grid,
+      .group { grid-template-columns: minmax(0, 1fr); }
+
+      .group > h3 { margin: 0 0 1.125rem 0; }
+
+      .entry-grid .pub-entry { padding: 1.625rem 0; }
+      .entry-grid .pub-entry:first-child { padding-top: 0.5rem; }
+      .entry-grid .pub-entry + .pub-entry { border-top: 1px solid var(--line-soft); }
+
+      /* A row without a thumbnail takes the full width, so its video isn't
+         squeezed into the narrow text column. */
+      .project-row.wide > * { grid-column: 1 / -1; }
+    }
+
+    /* Phones. Everything stacks into a single column. */
+    @media (max-width: 40rem) {
+      .tabs {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .tab-btn {
+        padding: 0.75rem 0.125rem;
+        font-size: clamp(0.5625rem, 2.9vw, 0.6875rem);
+      }
+
+      .header-grid { grid-template-columns: minmax(0, 1fr); }
       .header-photo { order: -1; }
-      .header-photo img { margin: 0 auto; max-width: 230px; }
-      .project-row { grid-template-columns: 1fr; gap: 18px; }
-      .project-row .thumb img { max-width: 340px; }
-      .news-item { grid-template-columns: 1fr; gap: 10px; }
-      .tab-btn { min-width: 0; flex: 1 1 30%; padding: 12px 8px; letter-spacing: 0.12em; }
+      .header-photo img { margin: 0 auto; max-width: 14.5rem; }
+
+      .links-row { column-gap: 2rem; }
+      .links-row a + a::before { left: -1rem; }
+
+      .project-row { grid-template-columns: minmax(0, 1fr); padding: 1.625rem 0; }
+      .project-row .thumb img { max-width: 22rem; }
+
+      .news-item { grid-template-columns: minmax(0, 1fr); padding: 1.5rem 0; }
+    }
+
+    /* Short screens (a phone held sideways). The tab bar scrolls away with
+       the page instead of permanently covering a fifth of the screen. */
+    @media (max-height: 30rem) {
+      .tabs { position: static; }
+    }
+
+    /* Touch screens: give the small links a finger-sized target. */
+    @media (pointer: coarse) {
+      .links-row a { padding-top: 0.75rem; padding-bottom: 0.75rem; }
     }
 
     /* Users who ask their OS to reduce motion get no animation. */
@@ -691,28 +890,36 @@
         </div>
 
         <div class="header-photo">
-          <img src="Abid_Buet.jpg" alt="Mohammad Abid Hasan">
+          <img src="Abid_Buet.jpg" alt="Mohammad Abid Hasan" width="1440" height="1440">
         </div>
       </div>
 
       <hr class="rule">
 
-      <h3>Education</h3>
-      <ul>
-        <li><strong>Texas Tech University</strong>, M.S. in Atmospheric Science (Jan 2025 &ndash; Present). CGPA 4.00/4.00.</li>
-        <li><strong>Texas State University</strong>, M.S. in Civil Engineering (Sep 2024 &ndash; Dec 2024). CGPA 4.00/4.00.</li>
-        <li><strong>Bangladesh University of Engineering and Technology (BUET)</strong>, B.Sc. in Civil Engineering (Mar 2018 &ndash; May 2023). CGPA 3.52/4.00.</li>
-      </ul>
+      <!-- Two lists side by side on a wide screen, stacked on a small one.
+           Each half is one <div> holding an h3 and a list. -->
+      <div class="split">
+        <div>
+          <h3>Education</h3>
+          <ul>
+            <li><strong>Texas Tech University</strong>, M.S. in Atmospheric Science (Jan 2025 &ndash; Present). CGPA 4.00/4.00.</li>
+            <li><strong>Texas State University</strong>, M.S. in Civil Engineering (Sep 2024 &ndash; Dec 2024). CGPA 4.00/4.00.</li>
+            <li><strong>Bangladesh University of Engineering and Technology (BUET)</strong>, B.Sc. in Civil Engineering (Mar 2018 &ndash; May 2023). CGPA 3.52/4.00.</li>
+          </ul>
+        </div>
 
-      <h3>Research Interests</h3>
-      <ul>
-        <li>Wind engineering and computational wind engineering (CWE)</li>
-        <li>Building relevant winds (damaging straight line winds, thunderstorms, tornadoes); data assimilation</li>
-        <li>Disaster resilient built environment</li>
-        <li>AI accelerated computational fluid dynamics (CFD)</li>
-        <li>Urban canopy layer dynamics, urban heat island</li>
-        <li>Structural health monitoring, non destructive evaluation, smart infrastructure systems</li>
-      </ul>
+        <div>
+          <h3>Research Interests</h3>
+          <ul>
+            <li>Wind engineering and computational wind engineering (CWE)</li>
+            <li>Building relevant winds (damaging straight line winds, thunderstorms, tornadoes); data assimilation</li>
+            <li>Disaster resilient built environment</li>
+            <li>AI accelerated computational fluid dynamics (CFD)</li>
+            <li>Urban canopy layer dynamics, urban heat island</li>
+            <li>Structural health monitoring, non destructive evaluation, smart infrastructure systems</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <!-- ==========================================================================
@@ -723,7 +930,7 @@
       <h2>Research</h2>
 
       <div class="project-row">
-        <div class="thumb"><img src="TLV.png" alt="Tornado-like vortex simulation"></div>
+        <div class="thumb"><img src="TLV.png" alt="Tornado-like vortex simulation" width="1128" height="816" loading="lazy"></div>
         <div>
           <span class="papertitle">Large Eddy Simulation of Tornado Like Vortices Generated by Moving Louvers</span>
           <strong>Mohammad Abid Hasan</strong><br>
@@ -734,7 +941,8 @@
         </div>
       </div>
 
-      <!-- Full-width row: the video replaces the thumbnail column.
+      <!-- Row without a thumbnail ("wide"): the text and video sit in the
+           text column, lined up with the rows around them.
            To swap the video, change the <source> src. Keep the width and
            height attributes matching the file (they stop the page jumping
            while the video loads). Add "autoplay" to the <video> tag if you
@@ -758,7 +966,7 @@
       </div>
 
       <div class="project-row">
-        <div class="thumb"><img src="TLV_Building.png" alt="Tornado-like vortex induced loading on low-rise building"></div>
+        <div class="thumb"><img src="TLV_Building.png" alt="Tornado-like vortex induced loading on low-rise building" width="1665" height="993" loading="lazy"></div>
         <div>
           <span class="papertitle">Data Driven Surrogate Models for Vortex Induced Pressure Loading</span>
           <strong>Mohammad Abid Hasan</strong><br>
@@ -770,7 +978,7 @@
       </div>
 
       <div class="project-row">
-        <div class="thumb"><img src="Abid_Poster.png" alt="Poster presentation on TLV CFD research"></div>
+        <div class="thumb"><img src="Abid_Poster.png" alt="Poster presentation on TLV CFD research" width="1280" height="719" loading="lazy"></div>
         <div>
           <span class="papertitle">Poster Presentation</span>
           <strong>Mohammad Abid Hasan</strong><br>
@@ -791,100 +999,129 @@
          Chip styles:  <span class="pub-tag">      solid white  — published
                        <span class="pub-tag alt">  outlined     — accepted
                        <span class="pub-tag warn"> dashed       — in preparation
+
+         Each category is one <div class="group">: its h3 label, then a <div>
+         holding the entries. On a wide screen the label sits to the left of
+         the entries; on a small one it sits above them.
+         To add a paper: copy a .pub-entry inside the right group.
+         To add a category: copy a whole .group.
          ========================================================================== -->
     <section id="publications" class="tab-panel panel" role="tabpanel">
       <h2>Publications</h2>
 
-      <h3>Peer-reviewed journal</h3>
-      <div class="pub-entry">
-        <span class="pub-tag">Published</span><br>
-        <span class="papertitle">Advancing tornado-like vortex (TLV) generation in straight-line wind simulators: An LES study</span>
-        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
-        <span class="pub-meta">Journal of Wind Engineering and Industrial Aerodynamics, Volume 271, 2026, 106373, ISSN 0167-6105.</span><br>
-        <a href="https://doi.org/10.1016/j.jweia.2026.106373" target="_blank" rel="noopener">doi.org/10.1016/j.jweia.2026.106373</a>
+      <div class="group">
+        <h3>Peer-reviewed journal</h3>
+        <div>
+          <div class="pub-entry">
+            <span class="pub-tag">Published</span><br>
+            <span class="papertitle">Advancing tornado-like vortex (TLV) generation in straight-line wind simulators: An LES study</span>
+            <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+            <span class="pub-meta">Journal of Wind Engineering and Industrial Aerodynamics, Volume 271, 2026, 106373, ISSN 0167-6105.</span><br>
+            <a href="https://doi.org/10.1016/j.jweia.2026.106373" target="_blank" rel="noopener">doi.org/10.1016/j.jweia.2026.106373</a>
+          </div>
+        </div>
       </div>
 
-      <h3>Peer-reviewed journal (to be submitted)</h3>
-      <div class="pub-entry">
-        <span class="pub-tag warn">In preparation</span><br>
-        <span class="papertitle">Tornado-like vortex (TLV) induced loading in straight-line wind simulators</span>
-        Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>, Franklin T. Lombardo.
+      <div class="group">
+        <h3>Peer-reviewed journal (to be submitted)</h3>
+        <div>
+          <div class="pub-entry">
+            <span class="pub-tag warn">In preparation</span><br>
+            <span class="papertitle">Tornado-like vortex (TLV) induced loading in straight-line wind simulators</span>
+            Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>, Franklin T. Lombardo.
+          </div>
+        </div>
       </div>
 
-      <h3>Conference presentations</h3>
-      <div class="pub-entry">
-        <span class="pub-tag alt">Oral, AMS 2026</span><br>
-        <span class="papertitle">Generating tornado-like vortices (TLVs) in straight-line simulators using moving louvers with LES</span>
-        <span class="pub-meta">Oral presentation at the 2026 AMS Annual Meeting, Houston, TX.</span>
+      <div class="group">
+        <h3>Conference presentations</h3>
+        <div>
+          <div class="pub-entry">
+            <span class="pub-tag alt">Oral, AMS 2026</span><br>
+            <span class="papertitle">Generating tornado-like vortices (TLVs) in straight-line simulators using moving louvers with LES</span>
+            <span class="pub-meta">Oral presentation at the 2026 AMS Annual Meeting, Houston, TX.</span>
+          </div>
+        </div>
       </div>
 
-      <h3>Peer-reviewed conference abstracts (to be presented)</h3>
-      <div class="pub-entry">
-        <span class="pub-tag alt">ICWE 2026</span><br>
-        <span class="papertitle">Advancing Tornado-Like Vortices (TLVs) Modeling in Straight-Line Simulators</span>
-        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
-        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
-      </div>
-      <div class="pub-entry">
-        <span class="pub-tag alt">ICWE 2026</span><br>
-        <span class="papertitle">Digital twin of a supercell rear-flank downdraft (RFD) current in a computational domain using LES</span>
-        <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Samuel Hanson, Jon Schroeder.<br>
-        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
-      </div>
-      <div class="pub-entry">
-        <span class="pub-tag alt">ICWE 2026</span><br>
-        <span class="papertitle">Investigating interference effects on aerodynamic loading under tornado-like vortices: An LES study</span>
-        Samuel Hanson, <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled.<br>
-        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
-      </div>
-      <div class="pub-entry">
-        <span class="pub-tag alt">ICWE 2026</span><br>
-        <span class="papertitle">AI/ML-Powered processing of near-surface anemometer network observation for enhancing CFD simulations of low-rise buildings under downburst events</span>
-        Guangzhao Chen, Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>.<br>
-        <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+      <div class="group">
+        <h3>Peer-reviewed conference abstracts (to be presented)</h3>
+        <div>
+          <div class="pub-entry">
+            <span class="pub-tag alt">ICWE 2026</span><br>
+            <span class="papertitle">Advancing Tornado-Like Vortices (TLVs) Modeling in Straight-Line Simulators</span>
+            <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Franklin T. Lombardo.<br>
+            <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+          </div>
+          <div class="pub-entry">
+            <span class="pub-tag alt">ICWE 2026</span><br>
+            <span class="papertitle">Digital twin of a supercell rear-flank downdraft (RFD) current in a computational domain using LES</span>
+            <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled, Samuel Hanson, Jon Schroeder.<br>
+            <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+          </div>
+          <div class="pub-entry">
+            <span class="pub-tag alt">ICWE 2026</span><br>
+            <span class="papertitle">Investigating interference effects on aerodynamic loading under tornado-like vortices: An LES study</span>
+            Samuel Hanson, <strong>Mohammad Abid Hasan</strong>, Faiaz Khaled.<br>
+            <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+          </div>
+          <div class="pub-entry">
+            <span class="pub-tag alt">ICWE 2026</span><br>
+            <span class="papertitle">AI/ML-Powered processing of near-surface anemometer network observation for enhancing CFD simulations of low-rise buildings under downburst events</span>
+            Guangzhao Chen, Faiaz Khaled, <strong>Mohammad Abid Hasan</strong>.<br>
+            <span class="pub-meta">The 8th International Symposium on Computational Wind Engineering, London, ON, Canada (2026).</span>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ==========================================================================
          FIELD WORK
+         Entries inside a <div class="entry-grid"> sit two across on a wide
+         screen and one per row on a small one.
+         To add an entry: copy a .pub-entry inside the right .entry-grid.
          ========================================================================== -->
     <section id="fieldwork" class="tab-panel panel" role="tabpanel">
       <h2>Field Deployment</h2>
 
-      <div class="pub-entry">
-        <span class="papertitle">High-resolution ABL data around an instrumented cube &mdash; Lubbock, Texas</span>
-        <span class="pub-meta">25 Jun 2025 &ndash; 27 Jun 2025</span>
-        <ul>
-          <li>Deployed TTU StickNets to gather wind data at high spatial resolution.</li>
-          <li>Gathered high-resolution spatial and temporal wind velocity and pressure data around an instrumented cube.</li>
-        </ul>
-      </div>
+      <div class="entry-grid">
+        <div class="pub-entry">
+          <span class="papertitle">High-resolution ABL data around an instrumented cube &mdash; Lubbock, Texas</span>
+          <span class="pub-meta">25 Jun 2025 &ndash; 27 Jun 2025</span>
+          <ul>
+            <li>Deployed TTU StickNets to gather wind data at high spatial resolution.</li>
+            <li>Gathered high-resolution spatial and temporal wind velocity and pressure data around an instrumented cube.</li>
+          </ul>
+        </div>
 
-      <div class="pub-entry">
-        <span class="papertitle">Vortex-based flow system (dust devil) &mdash; Las Cruces, New Mexico</span>
-        <span class="pub-meta">29 Jun 2025 &ndash; 3 Jul 2025</span>
-        <ul>
-          <li>Deployed TTU StickNets and GoPro cameras to visualize and quantify loading on an instrumented cube induced by a dust devil.</li>
-          <li>Collected near-ground, high-resolution spatial and temporal thunderstorm outflow data.</li>
-        </ul>
+        <div class="pub-entry">
+          <span class="papertitle">Vortex-based flow system (dust devil) &mdash; Las Cruces, New Mexico</span>
+          <span class="pub-meta">29 Jun 2025 &ndash; 3 Jul 2025</span>
+          <ul>
+            <li>Deployed TTU StickNets and GoPro cameras to visualize and quantify loading on an instrumented cube induced by a dust devil.</li>
+            <li>Collected near-ground, high-resolution spatial and temporal thunderstorm outflow data.</li>
+          </ul>
+        </div>
       </div>
 
       <h3>Selected past projects</h3>
-      <div class="pub-entry">
-        <span class="papertitle">TxDOT 0-7206: Optimum 2-Mat Reinforcement Design in CRCP</span>
-        <ul>
-          <li>Conducted finite element simulations to optimize CRCP designs using ANSYS.</li>
-          <li>Coordinated field data collection and analyzed structural performance using Loggernet.</li>
-        </ul>
-      </div>
+      <div class="entry-grid">
+        <div class="pub-entry">
+          <span class="papertitle">TxDOT 0-7206: Optimum 2-Mat Reinforcement Design in CRCP</span>
+          <ul>
+            <li>Conducted finite element simulations to optimize CRCP designs using ANSYS.</li>
+            <li>Coordinated field data collection and analyzed structural performance using Loggernet.</li>
+          </ul>
+        </div>
 
-      <div class="pub-entry">
-        <span class="papertitle">Real-Time Structural Health Monitoring &mdash; Kyle Fire Station</span>
-        <span class="pub-meta">Apr 2023 &ndash; Nov 2024</span>
-        <ul>
-          <li>Implemented a self-sensing concrete system with vibrating wire strain gauges.</li>
-          <li>Analyzed real-time data for infrastructure performance using Loggernet.</li>
-        </ul>
+        <div class="pub-entry">
+          <span class="papertitle">Real-Time Structural Health Monitoring &mdash; Kyle Fire Station</span>
+          <span class="pub-meta">Apr 2023 &ndash; Nov 2024</span>
+          <ul>
+            <li>Implemented a self-sensing concrete system with vibrating wire strain gauges.</li>
+            <li>Analyzed real-time data for infrastructure performance using Loggernet.</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -895,7 +1132,7 @@
       <h2>Teaching</h2>
 
       <div class="project-row">
-        <div class="thumb"><img src="DIU.jpeg" alt="Dhaka International University"></div>
+        <div class="thumb"><img src="DIU.jpeg" alt="Dhaka International University" width="1600" height="1066" loading="lazy"></div>
         <div>
           <span class="papertitle">Lecturer, Dhaka International University</span>
           <span class="pub-meta">Aug 2023 &ndash; Jul 2024</span>
@@ -906,10 +1143,13 @@
         </div>
       </div>
 
-      <div class="pub-entry">
-        <span class="papertitle">Mentoring</span>
-        <span class="pub-meta">Spring 2026</span>
-        <p>Mentored an undergraduate student to develop a machine learning model (XGBoost) to accelerate numerical simulation.</p>
+      <!-- Row without a thumbnail ("wide"): the text lines up with the row above. -->
+      <div class="project-row wide">
+        <div>
+          <span class="papertitle">Mentoring</span>
+          <span class="pub-meta">Spring 2026</span>
+          <p>Mentored an undergraduate student to develop a machine learning model (XGBoost) to accelerate numerical simulation.</p>
+        </div>
       </div>
     </section>
 
@@ -1108,18 +1348,27 @@
                                  // for plain filaments with no glitter.
     /* ---------------------------------------------------------------------- */
 
+    // Match the drawing surface to the canvas's on-screen box (its size is
+    // set in the CSS). Returns false when nothing changed. That is the usual
+    // case on a phone: the address bar sliding in and out fires "resize"
+    // without changing the canvas, and rebuilding then would make the
+    // background visibly restart every time you scroll.
     function resize() {
-      DPR = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width  = W * DPR;
-      canvas.height = H * DPR;
-      canvas.style.width  = W + 'px';
-      canvas.style.height = H + 'px';
+      const w = canvas.clientWidth  || window.innerWidth;
+      const h = canvas.clientHeight || window.innerHeight;
+      // Sharp on high-density screens, but capped at about 9 million pixels
+      // so a very large monitor isn't repainting far more than it can show.
+      const dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(9e6 / (w * h)));
+      if (w === W && h === H && dpr === DPR) return false;
+      W = w;
+      H = h;
+      DPR = dpr;
+      canvas.width  = Math.round(W * DPR);
+      canvas.height = Math.round(H * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      return true;
     }
     resize();
-    window.addEventListener('resize', resize);
 
     // Velocity field. Given a point and a time, returns (vx, vy).
     function flow(x, y, t, out) {
@@ -1143,7 +1392,7 @@
       out.vy =        e1y + e2y + e3y;
     }
 
-    // Particle set. Rebuilt whenever the window changes size.
+    // Particle set. Rebuilt whenever the canvas changes size.
     // A small share of them are "motes": brighter points that twinkle,
     // instead of drawn streaks. That's where the glitter comes from.
     let particles = [];
@@ -1163,11 +1412,19 @@
       }
     }
     buildParticles();
-    window.addEventListener('resize', buildParticles);
+    window.addEventListener('resize', () => { if (resize()) buildParticles(); });
 
     const v = { vx: 0, vy: 0 };
 
     function frame() {
+      // Queue the next frame first, so nothing below can ever stop the loop.
+      requestAnimationFrame(frame);
+
+      // No size yet: the page was opened in a hidden or zero-size window.
+      // Skip drawing (the maths below would divide by zero). The "resize"
+      // listener rebuilds everything as soon as the window has a size.
+      if (!W || !H) return;
+
       // Paint the page colour over everything at low alpha. Old streaks fade
       // out gradually instead of being erased, which is what makes the trails.
       ctx.fillStyle = 'rgba(8, 9, 11, ' + fadeAlpha + ')';
@@ -1241,8 +1498,6 @@
           p.mote = Math.random() < moteShare;
         }
       }
-
-      requestAnimationFrame(frame);
     }
 
     // Draw one still frame for people who've asked for reduced motion.
